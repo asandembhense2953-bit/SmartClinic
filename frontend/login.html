@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SmartClinic — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--teal:#009e78;--teal-dark:#007a5c;--navy:#0a2a3b}
+    body{font-family:'Inter',sans-serif;background:linear-gradient(145deg,#0b2b38,#071e28);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .wrap{max-width:1300px;width:100%;background:#fff;border-radius:32px;overflow:hidden;display:flex;flex-wrap:wrap;box-shadow:0 25px 45px -12px rgba(0,0,0,.25)}
+
+    /* LEFT */
+    .left{flex:1.2;position:relative;background:url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1200&q=85') center/cover no-repeat;min-height:560px}
+    .left::before{content:"";position:absolute;inset:0;background:linear-gradient(125deg,rgba(10,42,59,.78) 0%,rgba(0,100,80,.55) 70%,rgba(10,42,59,.88) 100%);z-index:1}
+    .left::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(0,200,150,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,150,.08) 1px,transparent 1px);background-size:42px 42px;z-index:2}
+    .lc{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:48px 42px;color:#fff}
+    .logo-area{display:flex;align-items:center;gap:14px;margin-bottom:52px}
+    .logo-pill{background:rgba(255,255,255,.96);border-radius:16px;padding:7px 14px;box-shadow:0 6px 14px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;height:52px}
+    .logo-pill img{height:36px;width:auto;object-fit:contain}
+    .logo-text{font-size:1.8rem;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#fff,#c0fff0);-webkit-background-clip:text;background-clip:text;color:transparent}
+    h1{font-size:2.7rem;font-weight:800;line-height:1.2;margin-bottom:16px;letter-spacing:-.02em}
+    h1 span{color:#5ee0c4;border-bottom:3px solid rgba(94,224,196,.45)}
+    .desc{font-size:.97rem;line-height:1.55;color:rgba(255,255,255,.8);max-width:86%;margin-bottom:30px}
+    .feats{display:flex;flex-direction:column;gap:14px}
+    .feat{display:flex;align-items:center;gap:12px;font-size:.875rem;font-weight:500;color:rgba(255,255,255,.88);background:rgba(255,255,255,.06);padding:6px 14px 6px 7px;border-radius:60px;width:fit-content}
+    .feat-ico{width:34px;height:34px;background:rgba(0,200,150,.2);border:1px solid rgba(94,224,196,.4);border-radius:40px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+    .foot{margin-top:40px;font-size:.67rem;opacity:.55;letter-spacing:.3px}
+
+    /* RIGHT */
+    .right{flex:1;background:#fff;display:flex;align-items:center;justify-content:center;padding:48px 42px}
+    .box{width:100%;max-width:460px}
+    .box h2{font-size:2rem;font-weight:800;color:#0b2b38;letter-spacing:-.3px}
+    .box .sub{color:#5f7f8c;font-size:.88rem;margin-top:5px;margin-bottom:22px}
+
+    /* Demo card */
+    .demo{background:#f0fdf9;border:1px solid #bbe9df;border-radius:22px;padding:16px 18px;margin-bottom:26px}
+    .demo-lbl{display:flex;align-items:center;gap:7px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--teal);margin-bottom:12px}
+    .demo-lbl .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+    .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+    .db{background:#fff;border:1.5px solid #cee5e0;border-radius:13px;padding:9px 11px;text-align:left;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+    .db:hover{border-color:var(--teal);box-shadow:0 4px 12px rgba(0,158,120,.1);transform:translateY(-1px)}
+    .db .r{font-weight:800;font-size:.75rem;color:var(--teal);display:block;margin-bottom:2px}
+    .db .e{font-size:.66rem;color:#688b86;word-break:break-all}
+    .full{grid-column:span 2}
+    .pw-note{background:#daf2eb;display:inline-block;font-size:.68rem;padding:4px 11px;border-radius:40px;font-weight:600;color:#007a5c}
+
+    /* Form */
+    #toast{margin-bottom:14px;padding:11px 15px;border-radius:16px;font-size:.8rem;font-weight:500;border-left:4px solid;display:none}
+    #toast.show{display:block}
+    .field{margin-bottom:18px}
+    .field label{display:block;font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#4f6a72;margin-bottom:6px}
+    .field input{width:100%;padding:13px 15px;font-size:.92rem;font-family:'Inter',sans-serif;background:#fff;border:1.5px solid #e2edf0;border-radius:15px;outline:none;transition:all .2s;color:#1e2f3a}
+    .field input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,158,120,.1)}
+    .field input::placeholder{color:#aac4cc}
+    .forgot{text-align:right;margin-top:5px;font-size:.72rem}
+    .forgot a{color:var(--teal);font-weight:600;text-decoration:none}
+    .sign-btn{width:100%;background:var(--teal);color:#fff;font-weight:700;font-size:1rem;padding:14px;border:none;border-radius:44px;cursor:pointer;font-family:'Inter',sans-serif;margin-top:10px;box-shadow:0 8px 22px rgba(0,158,120,.28);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .sign-btn:hover{background:var(--teal-dark);transform:scale(.985)}
+    .sign-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .reg-link{text-align:center;margin-top:22px;font-size:.83rem;color:#7c9aa6}
+    .reg-link a{color:var(--teal);font-weight:700;text-decoration:none}
+
+    @media(max-width:900px){.left{display:none}.right{border-radius:0;padding:36px 20px}}
+    @media(max-width:520px){.demo-grid{grid-template-columns:1fr}.full{grid-column:span 1}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="lc">
+      <div>
+        <div class="logo-area">
+          <div class="logo-pill">
+            <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg"
+                 alt="SmartClinic"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <span style="display:none;align-items:center">
+              <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="8" fill="#009e78"/>
+                <rect x="13" y="5" width="6" height="22" rx="3" fill="white"/>
+                <rect x="5" y="13" width="22" height="6" rx="3" fill="white"/>
+              </svg>
+            </span>
+          </div>
+          <div class="logo-text">SmartClinic</div>
+        </div>
+        <h1>Queue Intelligence<br>for <span>everyone</span></h1>
+        <p class="desc">Empowering patients &amp; staff with real-time occupancy, QR check-in, and predictive wait times.</p>
+        <div class="feats">
+          <div class="feat"><div class="feat-ico">📲</div> QR card check-in — zero contact</div>
+          <div class="feat"><div class="feat-ico">📡</div> Live sensors — updates every 10s</div>
+          <div class="feat"><div class="feat-ico">⏱️</div> Dynamic wait-time predictions</div>
+          <div class="feat"><div class="feat-ico">📈</div> Power BI admin analytics</div>
+        </div>
+      </div>
+      <div class="foot">SmartClinic · Group 2 · MUT DSOF300/DVSF300</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="box">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to your SmartClinic account</p>
+
+      <div class="demo">
+        <div class="demo-lbl"><span class="dot"></span>Demo Accounts — Click Any To Fill</div>
+        <div class="demo-grid">
+          <button class="db" onclick="fill('receptionist@smartclinic.co.za')">
+            <span class="r">🖥 Receptionist</span><span class="e">receptionist@smartclinic.co.za</span>
+          </button>
+          <button class="db" onclick="fill('doctor@smartclinic.co.za')">
+            <span class="r">👨‍⚕️ Doctor</span><span class="e">doctor@smartclinic.co.za</span>
+          </button>
+          <button class="db" onclick="fill('nurse@smartclinic.co.za')">
+            <span class="r">🩺 Nurse</span><span class="e">nurse@smartclinic.co.za</span>
+          </button>
+          <button class="db" onclick="fill('admin@smartclinic.co.za')">
+            <span class="r">📊 Admin</span><span class="e">admin@smartclinic.co.za</span>
+          </button>
+          <button class="db full" onclick="fill('patient@smartclinic.co.za')">
+            <span class="r">👤 Patient — Zanele Dlamini (SC-001)</span>
+            <span class="e">patient@smartclinic.co.za</span>
+          </button>
+        </div>
+        <span class="pw-note">🔑 All passwords: <strong>clinic123</strong></span>
+      </div>
+
+      <div id="toast"></div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input id="email" type="email" placeholder="you@smartclinic.co.za" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+        <div class="forgot"><a href="#">Forgot password?</a></div>
+      </div>
+
+      <button class="sign-btn" id="sign-btn" onclick="doLogin()">Sign In →</button>
+      <div class="reg-link">New patient? <a href="register.html">Register here</a></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Redirect if already logged in
+  const existing = getUser();
+  if (existing && ROLE_PAGES[existing.role]) {
+    window.location.href = ROLE_PAGES[existing.role];
+  }
+
+  function fill(email) {
+    $('email').value    = email;
+    $('password').value = 'clinic123';
+    toast('success', '✅ Demo credentials loaded — click Sign In.');
+  }
+
+  async function doLogin() {
+    const email = $('email').value.trim().toLowerCase();
+    const pw    = $('password').value;
+    if (!email || !pw) { toast('error', 'Please enter your email and password.'); return; }
+
+    const btn = $('sign-btn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    try {
+      const res = await api.login(email, pw);
+      // Store session — backend returns user without password
+      setUser(res.data);
+      toast('success', `✨ Welcome, ${res.data.full_name}! Redirecting…`);
+      setTimeout(() => { window.location.href = ROLE_PAGES[res.data.role]; }, 900);
+    } catch (err) {
+      toast('error', '❌ ' + (err.message || 'Login failed. Check your credentials.'));
+      btn.disabled = false;
+      btn.textContent = 'Sign In →';
+    }
+  }
+
+  function toast(type, msg) {
+    const el = $('toast');
+    const styles = {
+      success: { bg:'#E4F6EF', bdr:'#009e78', col:'#0C5E44' },
+      error:   { bg:'#FFF4F2', bdr:'#E5484D', col:'#B13E3E' },
+      info:    { bg:'#FEF7E0', bdr:'#F5B042', col:'#8A6B1E' },
+    };
+    const s = styles[type] || styles.info;
+    el.style.cssText = `background:${s.bg};border-color:${s.bdr};color:${s.col}`;
+    el.textContent = msg;
+    el.classList.add('show');
+    if (type !== 'success') setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  ['email','password'].forEach(id => {
+    $(id).addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+  });
+</script>
+</body>
+</html>

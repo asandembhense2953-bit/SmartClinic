@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartClinic — Patient</title>
+<link rel="stylesheet" href="../css/shared.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+.status-hero{background:linear-gradient(135deg,var(--navy-light),#0a2a1e);border:1px solid rgba(0,200,150,.2);border-radius:20px;padding:36px;text-align:center;position:relative;overflow:hidden}
+.status-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 120%,rgba(0,200,150,.15) 0%,transparent 70%);pointer-events:none}
+.status-hero .qn{font-family:var(--mono);font-size:5.5rem;font-weight:700;color:var(--green);line-height:1;position:relative}
+.status-hero .ql{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px}
+.status-hero .wt{font-size:1.2rem;font-weight:700;color:#fff;margin-top:14px}
+.status-hero .ws{font-size:.82rem;color:rgba(255,255,255,.45);margin-top:4px}
+.checkedin-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.25);border-radius:99px;padding:7px 18px;margin-top:14px;color:var(--green);font-weight:700;font-size:.85rem}
+.qr-card{border:1.5px solid rgba(0,200,150,.4);border-radius:16px;padding:20px;background:linear-gradient(135deg,#073530,#0a4a42);text-align:center;max-width:280px;margin:0 auto}
+.qr-card .cc-logo{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:4px}
+.qr-card .cc-brand{font-family:var(--mono);font-size:.8rem;font-weight:700;color:#fff}
+.qr-card .cc-brand em{font-style:normal;color:var(--green)}
+.qr-card .cc-sub{font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.qr-card .cc-qr{background:#fff;padding:7px;border-radius:8px;display:inline-block;margin-bottom:12px}
+.qr-card .pn{font-size:.95rem;font-weight:700;color:#fff}
+.qr-card .pp{font-family:var(--mono);font-size:.8rem;color:var(--green);margin-top:3px}
+.qr-card .pi{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:2px}
+.qr-card .pfoot{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:10px}
+.appt-row{padding:13px 15px;border-bottom:1px solid var(--border)}
+.appt-row:last-child{border-bottom:none}
+.appt-row .at{font-family:var(--mono);font-size:.82rem;color:var(--green);font-weight:700}
+.appt-row .ad{font-weight:600;margin-top:2px;font-size:.9rem}
+.appt-row .ar{font-size:.78rem;color:var(--text-dim);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="dash-shell">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
+    </div>
+    <div class="role-pill">Patient</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">My Visit</div>
+    <a class="nav-item active" href="#" onclick="return go('status',event)"><span class="icon">📋</span>My Status</a>
+    <a class="nav-item" href="#" onclick="return go('card',event)"><span class="icon">🪪</span>My QR Card</a>
+    <a class="nav-item" href="#" onclick="return go('appointments',event)"><span class="icon">📅</span>My Appointments</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="av" id="sb-av">ZD</div>
+      <div class="info"><div class="uname" id="sb-name">Zanele Dlamini</div><div class="urole" id="sb-pid">SC-001</div></div>
+    </div>
+    <button class="btn btn-outline btn-sm btn-block" style="margin-top:10px" onclick="logout()">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div><div class="topbar-title" id="pg-title">My Status</div><div class="topbar-meta">Live queue information for your visit</div></div>
+    <div class="topbar-right"><span style="font-size:.78rem;color:var(--text-dim)" id="clock"></span></div>
+  </div>
+  <div class="page-body">
+
+    <!-- STATUS -->
+    <div id="sec-status">
+      <div id="status-in" class="hidden" style="margin-bottom:20px">
+        <div class="status-hero fade-in">
+          <div class="ql">Your Queue Number</div>
+          <div class="qn" id="pat-qn">—</div>
+          <div class="wt" id="pat-wt">Estimated wait: —</div>
+          <div class="ws">The nurse will call your name when the doctor is ready</div>
+          <div class="checkedin-badge">● Checked In</div>
+        </div>
+        <div class="g2 fade-in" style="margin-top:18px;align-items:start">
+          <div class="stat-box"><div class="stat-val" id="pat-ahead">—</div><div class="stat-lbl">Patients ahead of you</div></div>
+          <div class="stat-box"><div class="stat-val" id="pat-avg">15m</div><div class="stat-lbl">Avg consultation time</div></div>
+        </div>
+      </div>
+
+      <div id="status-out" class="card">
+        <div style="text-align:center;padding:36px 20px">
+          <div style="font-size:4rem;margin-bottom:14px">🏥</div>
+          <div style="font-size:1.2rem;font-weight:700;margin-bottom:8px">You're not checked in yet</div>
+          <p style="color:var(--text-dim);font-size:.875rem;max-width:320px;margin:0 auto">Visit the kiosk at reception and scan your QR clinic card. Your queue number will appear here automatically.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px">
+            <button class="btn btn-primary" onclick="simMyCI()">📷 Simulate My Check-In</button>
+            <button class="btn btn-outline" onclick="go('card',{target:document.querySelector('.nav-item:nth-child(2)')})">🪪 View My Card</button>
+          </div>
+          <p style="font-size:.72rem;color:var(--text-dim);margin-top:14px">Can't find your card? Ask the receptionist to check you in manually.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR CARD -->
+    <div id="sec-card" class="hidden">
+      <div class="card" style="max-width:400px;margin:0 auto">
+        <div class="card-title">My QR Clinic Card</div>
+        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:18px">Present this card at the kiosk on every visit to check in automatically.</p>
+        <div class="qr-card">
+          <div class="cc-logo">
+            <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+            <span class="cc-brand">Smart<em>Clinic</em></span>
+          </div>
+          <div class="cc-sub">Official Clinic Card</div>
+          <div id="my-qr" style="display:flex;justify-content:center" class="cc-qr"></div>
+          <div class="pn" id="my-pname"></div>
+          <div class="pp" id="my-ppid"></div>
+          <div class="pi" id="my-pidnum"></div>
+          <div class="pfoot">Scan at kiosk on every visit</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="downloadMyCard()">⬇ Download PDF Card</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div id="sec-appointments" class="hidden">
+      <div class="card">
+        <div class="card-title">My Appointments</div>
+        <div id="my-appts"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+const user=requireAuth('patient');
+let myPatient=null;
+if(user){
+  const displayName=user.full_name||user.name||'Patient';
+  $('sb-name').textContent=displayName;
+  myPatient=SC.patients.find(p=>p.patient_id===user.patient_id)||SC.patients[0];
+  $('sb-av').textContent=(myPatient?.full_name||displayName).split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  $('sb-pid').textContent=myPatient?.patient_id||'—';
+}
+
+function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
+
+var SECS={status:'sec-status',card:'sec-card',appointments:'sec-appointments'};
+var TITLES={status:'My Status',card:'My QR Card',appointments:'My Appointments'};
+function go(name,evt){
+  evt = evt || window.event;
+  if(evt && evt.preventDefault) evt.preventDefault();
+  Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
+  $(SECS[name]).classList.remove('hidden');
+  if(evt&&evt.target){document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));evt.target.closest('.nav-item')&&evt.target.closest('.nav-item').classList.add('active');}
+  $('pg-title').textContent=TITLES[name];
+  if(name==='card')renderMyCard();
+  if(name==='appointments')renderMyAppts();
+  if(name==='status')refreshPat();
+  return false;
+}
+
+function refreshPat(){
+  if(!myPatient)return;
+  const entry=SC.queueEntries.find(q=>q.patient_id===myPatient.patient_id&&(q.status==='CheckedIn'||q.status==='Consulting'));
+  const pred=SC.predictionLogs.find(p=>p.patient_id===myPatient.patient_id&&p.actual===null);
+  if(entry){
+    $('status-in').classList.remove('hidden');$('status-out').classList.add('hidden');
+    $('pat-qn').textContent='#'+entry.queue_position;
+    const ahead=SC.queueEntries.filter(q=>q.status==='CheckedIn'&&q.queue_position<entry.queue_position).length;
+    $('pat-ahead').textContent=ahead;$('pat-avg').textContent=rollingAvg()+'m';
+    const wait=pred?pred.estimated_wait:calcWait(ahead);
+    $('pat-wt').textContent=wait>0?'Estimated wait: '+wait+' minutes':'Doctor is ready for you!';
+  }else{
+    $('status-in').classList.add('hidden');$('status-out').classList.remove('hidden');
+  }
+}
+function simMyCI(){
+  if(!myPatient)return;
+  const res=doCheckin(myPatient.patient_id,'QR_Scan');
+  if(!res.ok){alert(res.error);return;}
+  refreshPat();
+}
+
+function renderMyCard(){
+  if(!myPatient)return;
+  $('my-pname').textContent=myPatient.full_name;
+  $('my-ppid').textContent=myPatient.patient_id;
+  $('my-pidnum').textContent='ID: '+myPatient.id_number;
+  const d=$('my-qr');d.innerHTML='';
+  new QRCode(d,{text:myPatient.patient_id,width:140,height:140,colorDark:'#006B60',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+}
+
+function downloadMyCard(){
+  const p=myPatient;if(!p)return;
+  const canvas=document.querySelector('#my-qr canvas');if(!canvas){alert('QR not ready');return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:[85,54]});
+  doc.setFillColor(7,53,48);doc.rect(0,0,85,54,'F');
+  doc.setFillColor(0,200,150);doc.roundedRect(5,5,12,12,2,2,'F');
+  doc.setFillColor(255,255,255);doc.rect(9.5,7,3,8,'F');doc.rect(7,10,8,3,'F');
+  doc.setTextColor(255,255,255);doc.setFont('courier','bold');doc.setFontSize(9);doc.text('SmartClinic',20,10);
+  doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(178,223,219);doc.text('OFFICIAL CLINIC CARD',20,14.5);
+  doc.addImage(canvas.toDataURL('image/png'),'PNG',5,18,26,26);
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.text(p.full_name,34,22);
+  doc.setFont('courier','bold');doc.setFontSize(10);doc.setTextColor(0,200,150);doc.text(p.patient_id,34,29);
+  doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(178,223,219);doc.text('ID: '+p.id_number,34,35);
+  doc.setFontSize(5.5);doc.setTextColor(80,140,130);doc.text('Keep this card safe. Present at every visit.',5,51);
+  doc.save('SmartClinic-Card-'+p.patient_id+'.pdf');
+}
+
+function renderMyAppts(){
+  if(!myPatient)return;
+  const appts=SC.appointments.filter(a=>a.patient_id===myPatient.patient_id);
+  const c=$('my-appts');
+  if(!appts.length){c.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:28px">No appointments found.</div>';return;}
+  c.innerHTML=appts.map(a=>`<div class="appt-row"><div class="at">${fmtDateTime(a.datetime)}</div><div class="ad">${a.doctor}</div><div class="ar">${a.reason||'—'}</div><span class="badge badge-${a.status==='Booked'?'amber':'green'}" style="margin-top:6px">${a.status}</span></div>`).join('');
+}
+
+refreshPat();setInterval(refreshPat,5000);
+document.addEventListener('sensor2tick',refreshPat);
+</script>
+</body>
+</html>

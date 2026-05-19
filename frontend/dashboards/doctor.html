@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartClinic — Doctor</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+.timer-big{font-family:var(--mono);font-size:3.5rem;font-weight:700;color:var(--green);text-align:center;line-height:1;padding:14px 0}
+.patient-hero{background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px}
+.patient-hero .pn{font-size:1.3rem;font-weight:700}
+.patient-hero .pp{font-family:var(--mono);color:var(--green);font-size:.85rem;margin-top:3px}
+.formula-box{background:rgba(0,200,150,.05);border:1px dashed rgba(0,200,150,.25);border-radius:10px;padding:13px;font-family:var(--mono);font-size:.78rem;color:var(--green);white-space:pre-wrap;line-height:1.7}
+.qp{font-family:var(--mono);font-weight:700;color:var(--green)}
+.doc-contact{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.82rem;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.doc-contact .dc-num{font-family:var(--mono);color:var(--green);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="dash-shell">
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
+    </div>
+    <div class="role-pill">Doctor</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-item active" href="#" onclick="return go('consult',event)"><span class="icon">👨‍⚕️</span>Consultation</a>
+    <a class="nav-item" href="#" onclick="return go('queue',event)"><span class="icon">🖥</span>My Queue</a>
+    <a class="nav-item" href="#" onclick="return go('prediction',event)"><span class="icon">⏱</span>Prediction Log</a>
+    <a class="nav-item" href="#" onclick="return go('contacts',event)"><span class="icon">📞</span>Doctor Contacts</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="av" id="sb-av">MN</div>
+      <div class="info"><div class="uname" id="sb-name">Dr M. Nkosi</div><div class="urole" id="sb-contact">031-555-0101</div></div>
+    </div>
+    <button class="btn btn-outline btn-sm btn-block" style="margin-top:10px" onclick="logout()">Sign Out</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div><div class="topbar-title" id="pg-title">Consultation</div><div class="topbar-meta" id="pg-meta">Manage your active consultation</div></div>
+    <div class="topbar-right">
+      <span class="badge badge-green" id="q-badge">0 waiting</span>
+      <span style="font-size:.78rem;color:var(--text-dim)" id="clock"></span>
+    </div>
+  </div>
+  <div class="page-body">
+
+    <!-- CONSULTATION -->
+    <div id="sec-consult">
+      <div class="g2" style="align-items:start">
+
+        <!-- Active panel -->
+        <div class="card fade-in">
+          <div class="card-title">Active Consultation</div>
+          <div id="no-patient" style="text-align:center;padding:28px 0;color:var(--text-dim)">
+            <div style="font-size:3rem;margin-bottom:10px">🩺</div>
+            <div style="font-weight:600">No active consultation</div>
+            <div style="font-size:.8rem;margin-top:4px" id="next-lbl">No patients waiting.</div>
+          </div>
+          <div id="active-panel" class="hidden">
+            <div class="patient-hero">
+              <div class="pn" id="doc-pname">—</div>
+              <div class="pp" id="doc-ppid">—</div>
+            </div>
+            <div class="timer-big" id="doc-timer">00:00</div>
+            <button class="btn btn-danger btn-lg btn-block" onclick="endConsult()">⏹ End Consultation</button>
+          </div>
+          <hr class="div">
+          <div id="next-alert" class="alert alert-info hidden" style="margin-bottom:10px"></div>
+          <button id="begin-btn" class="btn btn-primary btn-lg btn-block" onclick="beginConsult()" disabled>▶ Begin Next Consultation</button>
+          <p style="font-size:.72rem;color:var(--text-dim);margin-top:7px" id="begin-sub">No patients waiting.</p>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card fade-in">
+            <div class="card-title">Dynamic Prediction Model</div>
+            <div class="g2" style="gap:12px;margin-bottom:12px">
+              <div class="stat-box" style="padding:14px"><div class="stat-val" id="pred-avg" style="font-size:2rem">15m</div><div class="stat-lbl">Rolling Avg</div></div>
+              <div class="stat-box" style="padding:14px"><div class="stat-val" id="pred-cnt" style="font-size:2rem">0</div><div class="stat-lbl">Done Today</div></div>
+            </div>
+            <div class="formula-box" id="pred-formula">Avg = default 15 min (no data yet)
+Waiting: 0 patients</div>
+          </div>
+          <div class="card fade-in">
+            <div class="card-title">Today's Stats</div>
+            <div class="g2" style="gap:12px">
+              <div class="stat-box" style="padding:14px"><div class="stat-val" id="st-w" style="font-size:2rem">0</div><div class="stat-lbl">Waiting</div></div>
+              <div class="stat-box" style="padding:14px"><div class="stat-val" id="st-d" style="font-size:2rem">0</div><div class="stat-lbl">Done</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MY QUEUE -->
+    <div id="sec-queue" class="hidden">
+      <div class="card">
+        <div class="section-header"><h3>My Queue — Patients Waiting</h3><button class="btn btn-outline btn-sm" onclick="refreshDoc()">↻ Refresh</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>ID</th><th>Checked In</th><th>Est. Wait</th><th>Status</th></tr></thead><tbody id="dq-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PREDICTION LOG -->
+    <div id="sec-prediction" class="hidden">
+      <div class="card">
+        <div class="card-title">PREDICTION_LOGS — Today</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Queue #</th><th>Estimated</th><th>Actual</th><th>Accuracy</th></tr></thead><tbody id="pl-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- DOCTOR CONTACTS -->
+    <div id="sec-contacts" class="hidden">
+      <div class="card" style="max-width:500px">
+        <div class="card-title">Doctor Contact Numbers</div>
+        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">All clinic doctors and their direct contact numbers.</p>
+        <div id="doc-contacts-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+const user=requireAuth('doctor');
+if(user){
+  const displayName=user.full_name||user.name||'Doctor';
+  $('sb-name').textContent=displayName;
+  $('sb-av').textContent=displayName.replace(/^Dr\s+/,'').split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+  if(user.contact) $('sb-contact').textContent=user.contact;
+}
+
+function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
+
+var SECS={consult:'sec-consult',queue:'sec-queue',prediction:'sec-prediction',contacts:'sec-contacts'};
+var TITLES={consult:'Consultation',queue:'My Queue',prediction:'Prediction Log',contacts:'Doctor Contacts'};
+var METAS={consult:'Manage your active consultation',queue:'Patients waiting for you',prediction:'Wait-time accuracy log',contacts:'Clinic doctor directory'};
+function go(name,evt){
+  evt = evt || window.event;
+  if(evt && evt.preventDefault) evt.preventDefault();
+  Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
+  $(SECS[name]).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  if(evt && evt.target) evt.target.closest('.nav-item').classList.add('active');
+  $('pg-title').textContent=TITLES[name];$('pg-meta').textContent=METAS[name];
+  if(name==='contacts')renderContacts();
+  refreshDoc();
+  return false;
+}
+
+let timerSecs=0,timerInt=null;
+
+function refreshDoc(){
+  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
+  const done=SC.predictionLogs.filter(p=>p.actual!==null).length;
+  const avg=rollingAvg();
+  $('q-badge').textContent=waiting.length+' waiting';
+  $('st-w').textContent=waiting.length;
+  $('st-d').textContent=done;
+  $('pred-avg').textContent=avg+'m';
+  $('pred-cnt').textContent=SC.consultationDurations.length;
+  const nums=SC.consultationDurations;
+  $('pred-formula').textContent=nums.length===0
+    ?'Avg = default 15 min (no data yet)\nWaiting: '+waiting.length+' patients'
+    :'Avg = ('+nums.join(' + ')+') ÷ '+nums.length+' = '+avg+' min\nWaiting: '+waiting.length+' patients';
+  const beginBtn=$('begin-btn');
+  if(waiting.length>0&&!SC.activeConsultation){
+    beginBtn.disabled=false;
+    $('begin-sub').textContent='Next: '+waiting[0].patient_name+' ('+waiting[0].patient_id+')';
+    $('next-alert').textContent='👋 '+waiting[0].patient_name+' is ready.';
+    $('next-alert').classList.remove('hidden');
+  }else{
+    beginBtn.disabled=true;
+    $('begin-sub').textContent=SC.activeConsultation?'Consultation in progress.':'No patients waiting.';
+    $('next-alert').classList.add('hidden');
+  }
+  // Queue table
+  const tbody=$('dq-tbody');
+  if(!waiting.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No patients waiting.</td></tr>';}
+  else{tbody.innerHTML=waiting.map((q,i)=>`<tr><td class="qp">#${q.queue_position}</td><td><b>${q.patient_name}</b></td><td><code>${q.patient_id}</code></td><td style="font-size:.78rem;color:var(--text-dim)">${fmtTime(q.checkin_time)}</td><td>${calcWait(i)} min</td><td><span class="badge badge-green">Waiting</span></td></tr>`).join('');}
+  // Prediction log
+  const ptbody=$('pl-tbody');
+  const completed=SC.predictionLogs.filter(p=>p.actual!==null);
+  if(!completed.length){ptbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:14px">No completed consultations yet.</td></tr>';}
+  else{ptbody.innerHTML=completed.map(p=>{
+    const acc=Math.max(0,Math.round(100-Math.abs((p.actual-p.estimated_wait)/Math.max(p.estimated_wait,1)*100)));
+    return`<tr><td><b>${p.patient_name}</b></td><td class="qp">#${p.queue_position}</td><td>${p.estimated_wait} min</td><td>${p.actual} min</td><td><span class="badge badge-${acc>=80?'green':acc>=60?'amber':'red'}">${acc}%</span></td></tr>`;
+  }).join('');}
+}
+
+function beginConsult(){
+  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
+  if(!waiting.length)return;
+  const next=waiting[0];next.status='Consulting';
+  SC.activeConsultation={entry:next,startTime:Date.now()};timerSecs=0;
+  $('no-patient').classList.add('hidden');$('active-panel').classList.remove('hidden');
+  $('doc-pname').textContent=next.patient_name;$('doc-ppid').textContent=next.patient_id;
+  timerInt=setInterval(()=>{
+    timerSecs++;
+    $('doc-timer').textContent=String(Math.floor(timerSecs/60)).padStart(2,'0')+':'+String(timerSecs%60).padStart(2,'0');
+  },1000);
+  refreshDoc();
+}
+function endConsult(){
+  if(!SC.activeConsultation)return;
+  clearInterval(timerInt);
+  const dur=Math.max(1,Math.round(timerSecs/60));
+  SC.consultationDurations.push(dur);
+  SC.activeConsultation.entry.status='Completed';
+  const log=SC.predictionLogs.find(p=>p.patient_id===SC.activeConsultation.entry.patient_id&&p.actual===null);
+  if(log)log.actual=dur;
+  SC.activeConsultation=null;timerSecs=0;
+  $('doc-timer').textContent='00:00';
+  $('no-patient').classList.remove('hidden');$('active-panel').classList.add('hidden');
+  writeSensor('ActiveQueueOccupancy','ConsultationEnd_Auto',null,activeCount());
+  refreshDoc();
+}
+
+function renderContacts(){
+  $('doc-contacts-list').innerHTML=DOCTORS.map(d=>`
+    <div class="doc-contact">
+      <div style="font-size:1.3rem">👨‍⚕️</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${d.name}</div>
+        <div style="font-size:.78rem;color:var(--text-dim)">${d.specialty}</div>
+      </div>
+      <div class="dc-num">📞 ${d.contact}</div>
+    </div>`).join('');
+}
+
+refreshDoc();setInterval(refreshDoc,5000);
+document.addEventListener('sensor2tick',refreshDoc);
+</script>
+</body>
+</html>

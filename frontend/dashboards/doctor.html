@@ -20,7 +20,7 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic" style="height:26px;width:auto;border-radius:6px;object-fit:contain">
       <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
     </div>
     <div class="role-pill">Doctor</div>
@@ -35,7 +35,7 @@
   <div class="sidebar-footer">
     <div class="user-chip">
       <div class="av" id="sb-av">MN</div>
-      <div class="info"><div class="uname" id="sb-name">Dr M. Nkosi</div><div class="urole" id="sb-contact">031-555-0101</div></div>
+      <div class="info"><div class="uname" id="sb-name">Dr M. Nkosi</div><div class="urole" id="sb-contact">—</div></div>
     </div>
     <button class="btn btn-outline btn-sm btn-block" style="margin-top:10px" onclick="logout()">Sign Out</button>
   </div>
@@ -104,7 +104,7 @@ Waiting: 0 patients</div>
     <div id="sec-queue" class="hidden">
       <div class="card">
         <div class="section-header"><h3>My Queue — Patients Waiting</h3><button class="btn btn-outline btn-sm" onclick="refreshDoc()">↻ Refresh</button></div>
-        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>ID</th><th>Checked In</th><th>Est. Wait</th><th>Status</th></tr></thead><tbody id="dq-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>Checked In</th><th>Est. Wait</th><th>Status</th></tr></thead><tbody id="dq-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -121,7 +121,7 @@ Waiting: 0 patients</div>
       <div class="card" style="max-width:500px">
         <div class="card-title">Doctor Contact Numbers</div>
         <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">All clinic doctors and their direct contact numbers.</p>
-        <div id="doc-contacts-list"></div>
+        <div id="doc-contacts-list"><div style="color:var(--text-dim);padding:16px">Loading…</div></div>
       </div>
     </div>
 
@@ -129,116 +129,260 @@ Waiting: 0 patients</div>
 </div>
 </div>
 
+<!-- Fallback utilities -->
+<script>
+if(!window.$){window.$=(id)=>document.getElementById(id);}
+if(!window.getUser){window.getUser=()=>{try{return JSON.parse(sessionStorage.getItem('sc_user'));}catch{return null;}};}
+if(!window.requireAuth){window.requireAuth=(role)=>{const u=getUser();if(!u){window.location.href='../login.html';return null;}if(role&&u.role!==role){window.location.href='../login.html';return null;}return u;};}
+if(!window.logout){window.logout=()=>{sessionStorage.removeItem('sc_user');sessionStorage.removeItem('sc_token');window.location.href='../login.html';};}
+</script>
+
 <script src="../js/api.js"></script>
 <script>
-const user=requireAuth('doctor');
-if(user){
-  const displayName=user.full_name||user.name||'Doctor';
-  $('sb-name').textContent=displayName;
-  $('sb-av').textContent=displayName.replace(/^Dr\s+/,'').split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
-  if(user.contact) $('sb-contact').textContent=user.contact;
-}
-
-function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
-
 var SECS={consult:'sec-consult',queue:'sec-queue',prediction:'sec-prediction',contacts:'sec-contacts'};
 var TITLES={consult:'Consultation',queue:'My Queue',prediction:'Prediction Log',contacts:'Doctor Contacts'};
 var METAS={consult:'Manage your active consultation',queue:'Patients waiting for you',prediction:'Wait-time accuracy log',contacts:'Clinic doctor directory'};
+
 function go(name,evt){
-  evt = evt || window.event;
-  if(evt && evt.preventDefault) evt.preventDefault();
+  evt=evt||window.event;
+  if(evt&&evt.preventDefault)evt.preventDefault();
   Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
   $(SECS[name]).classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  if(evt && evt.target) evt.target.closest('.nav-item').classList.add('active');
-  $('pg-title').textContent=TITLES[name];$('pg-meta').textContent=METAS[name];
+  if(evt&&evt.target&&evt.target.closest){const n=evt.target.closest('.nav-item');if(n)n.classList.add('active');}
+  $('pg-title').textContent=TITLES[name];
+  $('pg-meta').textContent=METAS[name];
   if(name==='contacts')renderContacts();
   refreshDoc();
   return false;
 }
 
-let timerSecs=0,timerInt=null;
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const currentUser = requireAuth('doctor');
+if(currentUser){
+  $('sb-av').textContent=(currentUser.full_name||'Dr').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+  $('sb-name').textContent=currentUser.full_name||'Doctor';
+}
 
-function refreshDoc(){
-  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
-  const done=SC.predictionLogs.filter(p=>p.actual!==null).length;
-  const avg=rollingAvg();
-  $('q-badge').textContent=waiting.length+' waiting';
-  $('st-w').textContent=waiting.length;
-  $('st-d').textContent=done;
-  $('pred-avg').textContent=avg+'m';
-  $('pred-cnt').textContent=SC.consultationDurations.length;
-  const nums=SC.consultationDurations;
-  $('pred-formula').textContent=nums.length===0
-    ?'Avg = default 15 min (no data yet)\nWaiting: '+waiting.length+' patients'
-    :'Avg = ('+nums.join(' + ')+') ÷ '+nums.length+' = '+avg+' min\nWaiting: '+waiting.length+' patients';
-  const beginBtn=$('begin-btn');
-  if(waiting.length>0&&!SC.activeConsultation){
-    beginBtn.disabled=false;
-    $('begin-sub').textContent='Next: '+waiting[0].patient_name+' ('+waiting[0].patient_id+')';
-    $('next-alert').textContent='👋 '+waiting[0].patient_name+' is ready.';
-    $('next-alert').classList.remove('hidden');
-  }else{
-    beginBtn.disabled=true;
-    $('begin-sub').textContent=SC.activeConsultation?'Consultation in progress.':'No patients waiting.';
-    $('next-alert').classList.add('hidden');
+// ── State ─────────────────────────────────────────────────────────────────────
+let timerSecs=0, timerInt=null;
+let activeQueueId=null; // the queue_id currently being consulted
+
+// ── Main refresh — all real API calls ────────────────────────────────────────
+async function refreshDoc(){
+  try{
+    // 1. Get active queue
+    const qRes = await api.getQueue();
+    const entries = qRes.data || [];
+
+    const waiting  = entries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
+    const consulting = entries.find(q=>q.status==='Consulting');
+    const waitCount = waiting.length;
+
+    // 2. Rolling average
+    let avg=15, doneCount=0, formula='Avg = default 15 min (no data yet)';
+    try{
+      const avgRes = await api.getRollingAvg();
+      const d = avgRes.data || {};
+      avg       = d.rolling_average_minutes || 15;
+      doneCount = d.consultations_completed || 0;
+      formula   = d.formula || formula;
+    }catch{}
+
+    // 3. Update stats UI
+    $('q-badge').textContent = waitCount+' waiting';
+    $('st-w').textContent    = waitCount;
+    $('st-d').textContent    = doneCount;
+    $('pred-avg').textContent = avg+'m';
+    $('pred-cnt').textContent = doneCount;
+    $('pred-formula').textContent = formula+'\nWaiting: '+waitCount+' patients';
+
+    // 4. Active consultation panel
+    if(consulting && activeQueueId === consulting.queue_id){
+      // Already tracking — just keep timer running
+      const pName = consulting.appointments?.patients?.full_name || '—';
+      const pId   = consulting.appointments?.patient_id || '—';
+      $('doc-pname').textContent = pName;
+      $('doc-ppid').textContent  = pId;
+      $('no-patient').classList.add('hidden');
+      $('active-panel').classList.remove('hidden');
+    } else if(consulting && !activeQueueId){
+      // Consultation started externally — sync up
+      activeQueueId = consulting.queue_id;
+      const pName = consulting.appointments?.patients?.full_name || '—';
+      const pId   = consulting.appointments?.patient_id || '—';
+      $('doc-pname').textContent = pName;
+      $('doc-ppid').textContent  = pId;
+      $('no-patient').classList.add('hidden');
+      $('active-panel').classList.remove('hidden');
+      if(!timerInt){
+        timerSecs=0;
+        timerInt=setInterval(()=>{
+          timerSecs++;
+          $('doc-timer').textContent=pad(Math.floor(timerSecs/60))+':'+pad(timerSecs%60);
+        },1000);
+      }
+    } else if(!consulting){
+      // No active consultation
+      if(!activeQueueId){
+        $('no-patient').classList.remove('hidden');
+        $('active-panel').classList.add('hidden');
+      }
+    }
+
+    // 5. Begin button
+    const beginBtn=$('begin-btn');
+    if(waitCount>0 && !activeQueueId){
+      const next=waiting[0];
+      const nextName=next.appointments?.patients?.full_name||'Next patient';
+      beginBtn.disabled=false;
+      $('begin-sub').textContent='Next: '+nextName;
+      $('next-alert').textContent='👋 '+nextName+' is ready.';
+      $('next-alert').classList.remove('hidden');
+    } else {
+      beginBtn.disabled=true;
+      $('begin-sub').textContent=activeQueueId?'Consultation in progress.':'No patients waiting.';
+      $('next-alert').classList.add('hidden');
+    }
+
+    // 6. Queue table
+    renderQueueTable(waiting, avg);
+
+    // 7. Prediction log
+    renderPredictionLog();
+
+  }catch(err){
+    console.warn('refreshDoc error:',err);
   }
-  // Queue table
+}
+
+function renderQueueTable(waiting, avg){
   const tbody=$('dq-tbody');
-  if(!waiting.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No patients waiting.</td></tr>';}
-  else{tbody.innerHTML=waiting.map((q,i)=>`<tr><td class="qp">#${q.queue_position}</td><td><b>${q.patient_name}</b></td><td><code>${q.patient_id}</code></td><td style="font-size:.78rem;color:var(--text-dim)">${fmtTime(q.checkin_time)}</td><td>${calcWait(i)} min</td><td><span class="badge badge-green">Waiting</span></td></tr>`).join('');}
-  // Prediction log
+  if(!waiting.length){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No patients waiting.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=waiting.map((q,i)=>{
+    const pName=q.appointments?.patients?.full_name||'—';
+    const checkinTime=q.checkin_time?new Date(q.checkin_time).toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}):'—';
+    const wait=i*avg;
+    return`<tr>
+      <td class="qp">#${q.queue_position}</td>
+      <td><b>${pName}</b></td>
+      <td style="font-size:.78rem;color:var(--text-dim)">${checkinTime}</td>
+      <td>${wait} min</td>
+      <td><span class="badge badge-green">Waiting</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function renderPredictionLog(){
   const ptbody=$('pl-tbody');
-  const completed=SC.predictionLogs.filter(p=>p.actual!==null);
-  if(!completed.length){ptbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:14px">No completed consultations yet.</td></tr>';}
-  else{ptbody.innerHTML=completed.map(p=>{
-    const acc=Math.max(0,Math.round(100-Math.abs((p.actual-p.estimated_wait)/Math.max(p.estimated_wait,1)*100)));
-    return`<tr><td><b>${p.patient_name}</b></td><td class="qp">#${p.queue_position}</td><td>${p.estimated_wait} min</td><td>${p.actual} min</td><td><span class="badge badge-${acc>=80?'green':acc>=60?'amber':'red'}">${acc}%</span></td></tr>`;
-  }).join('');}
+  try{
+    const res = await api.getPredictions();
+    const logs = res.data || [];
+    const completed = logs.filter(p=>p.actual_wait!=null);
+    if(!completed.length){
+      ptbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:14px">No completed consultations yet.</td></tr>';
+      return;
+    }
+    ptbody.innerHTML=completed.map(p=>{
+      const pName=p.queue_entries?.appointments?.patients?.full_name||'—';
+      const qPos=p.queue_entries?.queue_position||'—';
+      const acc=p.accuracy!=null?p.accuracy:Math.max(0,Math.round(100-Math.abs((p.actual_wait-p.estimated_wait)/Math.max(p.estimated_wait,1)*100)));
+      return`<tr>
+        <td><b>${pName}</b></td>
+        <td class="qp">#${qPos}</td>
+        <td>${p.estimated_wait} min</td>
+        <td>${p.actual_wait} min</td>
+        <td><span class="badge badge-${acc>=80?'green':acc>=60?'amber':'red'}">${acc}%</span></td>
+      </tr>`;
+    }).join('');
+  }catch{
+    ptbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:14px">Failed to load predictions.</td></tr>';
+  }
 }
 
-function beginConsult(){
-  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
-  if(!waiting.length)return;
-  const next=waiting[0];next.status='Consulting';
-  SC.activeConsultation={entry:next,startTime:Date.now()};timerSecs=0;
-  $('no-patient').classList.add('hidden');$('active-panel').classList.remove('hidden');
-  $('doc-pname').textContent=next.patient_name;$('doc-ppid').textContent=next.patient_id;
-  timerInt=setInterval(()=>{
-    timerSecs++;
-    $('doc-timer').textContent=String(Math.floor(timerSecs/60)).padStart(2,'0')+':'+String(timerSecs%60).padStart(2,'0');
-  },1000);
-  refreshDoc();
-}
-function endConsult(){
-  if(!SC.activeConsultation)return;
-  clearInterval(timerInt);
-  const dur=Math.max(1,Math.round(timerSecs/60));
-  SC.consultationDurations.push(dur);
-  SC.activeConsultation.entry.status='Completed';
-  const log=SC.predictionLogs.find(p=>p.patient_id===SC.activeConsultation.entry.patient_id&&p.actual===null);
-  if(log)log.actual=dur;
-  SC.activeConsultation=null;timerSecs=0;
-  $('doc-timer').textContent='00:00';
-  $('no-patient').classList.remove('hidden');$('active-panel').classList.add('hidden');
-  writeSensor('ActiveQueueOccupancy','ConsultationEnd_Auto',null,activeCount());
-  refreshDoc();
+// ── Begin consultation ────────────────────────────────────────────────────────
+async function beginConsult(){
+  try{
+    const qRes  = await api.getQueue();
+    const entries = qRes.data || [];
+    const next  = entries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position)[0];
+    if(!next) return;
+
+    const res = await api.beginConsultation(next.queue_id);
+    activeQueueId = next.queue_id;
+
+    const pName = next.appointments?.patients?.full_name || '—';
+    const pId   = next.appointments?.patient_id || next.appointment_id || '—';
+    $('doc-pname').textContent = pName;
+    $('doc-ppid').textContent  = pId;
+    $('no-patient').classList.add('hidden');
+    $('active-panel').classList.remove('hidden');
+    $('begin-btn').disabled=true;
+    $('next-alert').classList.add('hidden');
+
+    timerSecs=0;
+    clearInterval(timerInt);
+    timerInt=setInterval(()=>{
+      timerSecs++;
+      $('doc-timer').textContent=pad(Math.floor(timerSecs/60))+':'+pad(timerSecs%60);
+    },1000);
+
+    await refreshDoc();
+  }catch(err){
+    alert('❌ Failed to begin consultation: '+(err.message||'Unknown error'));
+  }
 }
 
-function renderContacts(){
-  $('doc-contacts-list').innerHTML=DOCTORS.map(d=>`
-    <div class="doc-contact">
-      <div style="font-size:1.3rem">👨‍⚕️</div>
-      <div style="flex:1">
-        <div style="font-weight:700">${d.name}</div>
-        <div style="font-size:.78rem;color:var(--text-dim)">${d.specialty}</div>
-      </div>
-      <div class="dc-num">📞 ${d.contact}</div>
-    </div>`).join('');
+// ── End consultation ──────────────────────────────────────────────────────────
+async function endConsult(){
+  if(!activeQueueId) return;
+  try{
+    clearInterval(timerInt); timerInt=null;
+    await api.endConsultation(activeQueueId);
+    activeQueueId=null; timerSecs=0;
+    $('doc-timer').textContent='00:00';
+    $('no-patient').classList.remove('hidden');
+    $('active-panel').classList.add('hidden');
+    await refreshDoc();
+  }catch(err){
+    alert('❌ Failed to end consultation: '+(err.message||'Unknown error'));
+  }
 }
 
-refreshDoc();setInterval(refreshDoc,5000);
-document.addEventListener('sensor2tick',refreshDoc);
+// ── Doctor contacts ───────────────────────────────────────────────────────────
+async function renderContacts(){
+  const el=$('doc-contacts-list');
+  el.innerHTML='<div style="color:var(--text-dim);padding:16px">Loading…</div>';
+  try{
+    const res = await api.getDoctors();
+    const docs = res.data||[];
+    if(!docs.length){el.innerHTML='<div style="color:var(--text-dim);padding:16px">No doctors found.</div>';return;}
+    el.innerHTML=docs.map(d=>`
+      <div class="doc-contact">
+        <div style="font-size:1.3rem">👨‍⚕️</div>
+        <div style="flex:1">
+          <div style="font-weight:700">${d.name}</div>
+          <div style="font-size:.78rem;color:var(--text-dim)">${d.department||d.specialisation||'General'}</div>
+        </div>
+        <div class="dc-num">📞 ${d.contact||'—'}</div>
+      </div>`).join('');
+  }catch{
+    el.innerHTML='<div style="color:#ef4444;padding:16px">Failed to load contacts.</div>';
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0');}
+
+function tickClock(){const cl=$('clock');if(cl)cl.textContent=new Date().toLocaleTimeString();}
+tickClock();setInterval(tickClock,1000);
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+refreshDoc();
+setInterval(refreshDoc,5000);
 </script>
 </body>
 </html>

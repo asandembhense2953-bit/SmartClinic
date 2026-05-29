@@ -128,6 +128,9 @@ CREATE TABLE IF NOT EXISTS prediction_logs (
 -- ============================================================
 -- INDEXES (performance for common queries)
 -- ============================================================
+ALTER TABLE appointments
+  ADD COLUMN IF NOT EXISTS type VARCHAR(50) DEFAULT 'scheduled';
+
 CREATE INDEX IF NOT EXISTS idx_appointments_patient   ON appointments(patient_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_datetime  ON appointments(datetime);
 CREATE INDEX IF NOT EXISTS idx_queue_status           ON queue_entries(status);

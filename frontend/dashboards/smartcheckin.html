@@ -388,6 +388,12 @@
 
 </div><!-- /kiosk-body -->
 
+<!-- Fallback utilities in case api.js fails to load -->
+<script>
+if(!window.$) { window.$ = (id) => document.getElementById(id); }
+if(!window.SC) { window.SC = { patientCounter: 2, queueCounter: 2, patients: [], appointments: [], queueEntries: [], sensorReadings: [], predictionLogs: [], consultationDurations: [], activeConsultation: null }; }
+</script>
+
 <script src="../js/api.js"></script>
 <script>
 // ── LOCAL STATE (mirrors the shared SC state + legacy PAT- format) ──

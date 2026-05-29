@@ -14,16 +14,17 @@
 .status-hero .wt{font-size:1.2rem;font-weight:700;color:#fff;margin-top:14px}
 .status-hero .ws{font-size:.82rem;color:rgba(255,255,255,.45);margin-top:4px}
 .checkedin-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.25);border-radius:99px;padding:7px 18px;margin-top:14px;color:var(--green);font-weight:700;font-size:.85rem}
-.qr-card{border:1.5px solid rgba(0,200,150,.4);border-radius:16px;padding:20px;background:linear-gradient(135deg,#073530,#0a4a42);text-align:center;max-width:280px;margin:0 auto}
-.qr-card .cc-logo{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:4px}
-.qr-card .cc-brand{font-family:var(--mono);font-size:.8rem;font-weight:700;color:#fff}
+.qr-card{border-radius:20px;padding:18px;background:linear-gradient(180deg,#072922,#06382f);text-align:center;max-width:320px;margin:0 auto;color:#fff}
+.qr-card .cc-top{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:8px}
+.qr-card .cc-top img{height:28px;width:auto;border-radius:6px;object-fit:contain;background:rgba(255,255,255,.06);padding:6px}
+.qr-card .cc-brand{font-family:var(--mono);font-size:1rem;font-weight:800;color:#fff}
 .qr-card .cc-brand em{font-style:normal;color:var(--green)}
-.qr-card .cc-sub{font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-.qr-card .cc-qr{background:#fff;padding:7px;border-radius:8px;display:inline-block;margin-bottom:12px}
-.qr-card .pn{font-size:.95rem;font-weight:700;color:#fff}
-.qr-card .pp{font-family:var(--mono);font-size:.8rem;color:var(--green);margin-top:3px}
-.qr-card .pi{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:2px}
-.qr-card .pfoot{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:10px}
+.qr-card .cc-sub{font-size:.68rem;color:rgba(255,255,255,.65);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.qr-card .cc-qr{background:#fff;padding:10px;border-radius:12px;display:inline-block;margin-bottom:12px}
+.qr-card .pn{font-size:1.05rem;font-weight:800;color:#fff;margin-top:6px;width:100%;overflow-wrap:anywhere;word-break:break-word}
+.qr-card .pp{font-family:var(--mono);font-size:.9rem;color:var(--green);margin-top:4px;width:100%;overflow-wrap:anywhere;word-break:break-word}
+.qr-card .pi{font-size:.76rem;color:rgba(255,255,255,.65);margin-top:4px;width:100%;overflow-wrap:anywhere;word-break:break-word}
+.qr-card .pfoot{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:10px}
 .appt-row{padding:13px 15px;border-bottom:1px solid var(--border)}
 .appt-row:last-child{border-bottom:none}
 .appt-row .at{font-family:var(--mono);font-size:.82rem;color:var(--green);font-weight:700}
@@ -36,7 +37,7 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic" style="height:26px;width:auto;border-radius:6px;object-fit:contain">
       <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
     </div>
     <div class="role-pill">Patient</div>
@@ -75,7 +76,7 @@
         </div>
         <div class="g2 fade-in" style="margin-top:18px;align-items:start">
           <div class="stat-box"><div class="stat-val" id="pat-ahead">—</div><div class="stat-lbl">Patients ahead of you</div></div>
-          <div class="stat-box"><div class="stat-val" id="pat-avg">15m</div><div class="stat-lbl">Avg consultation time</div></div>
+          <div class="stat-box"><div class="stat-val" id="pat-avg">—</div><div class="stat-lbl">Avg consultation time (min)</div></div>
         </div>
       </div>
 
@@ -86,7 +87,7 @@
           <p style="color:var(--text-dim);font-size:.875rem;max-width:320px;margin:0 auto">Visit the kiosk at reception and scan your QR clinic card. Your queue number will appear here automatically.</p>
           <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px">
             <button class="btn btn-primary" onclick="simMyCI()">📷 Simulate My Check-In</button>
-            <button class="btn btn-outline" onclick="go('card',{target:document.querySelector('.nav-item:nth-child(2)')})">🪪 View My Card</button>
+            <button class="btn btn-outline" onclick="go('card',{target:document.querySelectorAll('.nav-item')[1]})">🪪 View My Card</button>
           </div>
           <p style="font-size:.72rem;color:var(--text-dim);margin-top:14px">Can't find your card? Ask the receptionist to check you in manually.</p>
         </div>
@@ -99,8 +100,8 @@
         <div class="card-title">My QR Clinic Card</div>
         <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:18px">Present this card at the kiosk on every visit to check in automatically.</p>
         <div class="qr-card">
-          <div class="cc-logo">
-            <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+          <div class="cc-top">
+            <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic Logo">
             <span class="cc-brand">Smart<em>Clinic</em></span>
           </div>
           <div class="cc-sub">Official Clinic Card</div>
@@ -119,8 +120,24 @@
     <!-- APPOINTMENTS -->
     <div id="sec-appointments" class="hidden">
       <div class="card">
-        <div class="card-title">My Appointments</div>
-        <div id="my-appts"></div>
+        <div class="card-title">Book an Appointment</div>
+        <div style="background:#D1FAE5;border-left:3px solid #10B981;border-radius:8px;padding:11px 14px;color:#065F46;font-size:.8rem;margin-bottom:16px">📅 Available: Tomorrow onwards • Hours: 8:00 AM – 5:00 PM</div>
+        <div class="lf" style="margin-bottom:18px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div class="field"><label>Doctor *</label><select id="appt-doc" onchange="validateApptForm()"><option value="">Select a doctor</option></select></div>
+            <div class="field"><label>Date *</label><input id="appt-date" type="date" onchange="validateApptForm()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div class="field"><label>Time (8AM–5PM) *</label><input id="appt-time" type="time" min="08:00" max="17:00" onchange="validateApptForm()"></div>
+            <div class="field"><label>Reason</label><input id="appt-reason" type="text" placeholder="e.g. General checkup"></div>
+          </div>
+          <div id="appt-error" style="color:#ef4444;font-size:.8rem;margin-bottom:12px;display:none"></div>
+          <button class="btn btn-primary" id="appt-btn" onclick="bookAppointment()" disabled>📅 Book Appointment</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+          <div class="card-title" style="font-size:1rem">My Appointments</div>
+          <div id="my-appts"><div style="text-align:center;color:var(--text-dim);padding:20px">Loading...</div></div>
+        </div>
       </div>
     </div>
 
@@ -128,94 +145,300 @@
 </div>
 </div>
 
+<!-- Fallback utilities in case api.js fails to load -->
+<script>
+if(!window.$) { window.$ = (id) => document.getElementById(id); }
+if(!window.getUser) { window.getUser = () => { try { return JSON.parse(sessionStorage.getItem('sc_user')); } catch { return null; } }; }
+if(!window.requireAuth) { window.requireAuth = (role) => { const u = getUser(); if (!u) { window.location.href = '../login.html'; return null; } if (role && u.role !== role) { window.location.href = '../login.html'; return null; } return u; }; }
+if(!window.logout) { window.logout = () => { sessionStorage.removeItem('sc_user'); sessionStorage.removeItem('sc_token'); window.location.href = '../login.html'; }; }
+window.SECS = {status:'sec-status',card:'sec-card',appointments:'sec-appointments'};
+window.go = function(name,evt){ if(evt && evt.preventDefault) evt.preventDefault(); Object.keys(window.SECS).forEach(k => { const e = $(window.SECS[k]); if(e) e.classList.add('hidden'); }); const target = $(window.SECS[name]); if(target) target.classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); if(evt && evt.target && evt.target.closest) { const nav = evt.target.closest('.nav-item'); if(nav) nav.classList.add('active'); } return false; };
+</script>
+
 <script src="../js/api.js"></script>
 <script>
-const user=requireAuth('patient');
-let myPatient=null;
-if(user){
-  const displayName=user.full_name||user.name||'Patient';
-  $('sb-name').textContent=displayName;
-  myPatient=SC.patients.find(p=>p.patient_id===user.patient_id)||SC.patients[0];
-  $('sb-av').textContent=(myPatient?.full_name||displayName).split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-  $('sb-pid').textContent=myPatient?.patient_id||'—';
-}
-
-function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
-
 var SECS={status:'sec-status',card:'sec-card',appointments:'sec-appointments'};
 var TITLES={status:'My Status',card:'My QR Card',appointments:'My Appointments'};
+
 function go(name,evt){
   evt = evt || window.event;
   if(evt && evt.preventDefault) evt.preventDefault();
   Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
   $(SECS[name]).classList.remove('hidden');
-  if(evt&&evt.target){document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));evt.target.closest('.nav-item')&&evt.target.closest('.nav-item').classList.add('active');}
+  if(evt&&evt.target){
+    document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+    evt.target.closest&&evt.target.closest('.nav-item')&&evt.target.closest('.nav-item').classList.add('active');
+  }
   $('pg-title').textContent=TITLES[name];
-  if(name==='card')renderMyCard();
-  if(name==='appointments')renderMyAppts();
-  if(name==='status')refreshPat();
+  if(name==='card') renderMyCard();
+  if(name==='appointments'){ loadDoctors(); renderMyAppts(); }
+  if(name==='status') refreshPat();
   return false;
 }
 
-function refreshPat(){
-  if(!myPatient)return;
-  const entry=SC.queueEntries.find(q=>q.patient_id===myPatient.patient_id&&(q.status==='CheckedIn'||q.status==='Consulting'));
-  const pred=SC.predictionLogs.find(p=>p.patient_id===myPatient.patient_id&&p.actual===null);
-  if(entry){
-    $('status-in').classList.remove('hidden');$('status-out').classList.add('hidden');
-    $('pat-qn').textContent='#'+entry.queue_position;
-    const ahead=SC.queueEntries.filter(q=>q.status==='CheckedIn'&&q.queue_position<entry.queue_position).length;
-    $('pat-ahead').textContent=ahead;$('pat-avg').textContent=rollingAvg()+'m';
-    const wait=pred?pred.estimated_wait:calcWait(ahead);
-    $('pat-wt').textContent=wait>0?'Estimated wait: '+wait+' minutes':'Doctor is ready for you!';
-  }else{
-    $('status-in').classList.add('hidden');$('status-out').classList.remove('hidden');
-  }
-}
-function simMyCI(){
-  if(!myPatient)return;
-  const res=doCheckin(myPatient.patient_id,'QR_Scan');
-  if(!res.ok){alert(res.error);return;}
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const currentUser = requireAuth('patient');
+if(currentUser){
+  window.myPatient = currentUser;
+  $('sb-av').textContent=(currentUser.full_name||'Patient').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+  $('sb-name').textContent=currentUser.full_name||'Patient';
+  $('sb-pid').textContent=currentUser.patient_id||currentUser.id_number||'SC-000';
+  renderMyCard();
   refreshPat();
 }
 
-function renderMyCard(){
-  if(!myPatient)return;
-  $('my-pname').textContent=myPatient.full_name;
-  $('my-ppid').textContent=myPatient.patient_id;
-  $('my-pidnum').textContent='ID: '+myPatient.id_number;
-  const d=$('my-qr');d.innerHTML='';
-  new QRCode(d,{text:myPatient.patient_id,width:140,height:140,colorDark:'#006B60',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+// Cache doctors list so we can look up names by doctor_id
+window._doctorsCache = null;
+async function getDoctorsCache(){
+  if(window._doctorsCache) return window._doctorsCache;
+  try{
+    const res = await api.getDoctors();
+    window._doctorsCache = res.data || [];
+  }catch{ window._doctorsCache = []; }
+  return window._doctorsCache;
+}
+function doctorName(doctor_id){
+  if(!window._doctorsCache) return '—';
+  const d = window._doctorsCache.find(d => d.doctor_id === doctor_id);
+  return d ? d.name : '—';
 }
 
-function downloadMyCard(){
-  const p=myPatient;if(!p)return;
-  const canvas=document.querySelector('#my-qr canvas');if(!canvas){alert('QR not ready');return;}
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({unit:'mm',format:[85,54]});
-  doc.setFillColor(7,53,48);doc.rect(0,0,85,54,'F');
-  doc.setFillColor(0,200,150);doc.roundedRect(5,5,12,12,2,2,'F');
-  doc.setFillColor(255,255,255);doc.rect(9.5,7,3,8,'F');doc.rect(7,10,8,3,'F');
-  doc.setTextColor(255,255,255);doc.setFont('courier','bold');doc.setFontSize(9);doc.text('SmartClinic',20,10);
-  doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(178,223,219);doc.text('OFFICIAL CLINIC CARD',20,14.5);
+// ── Status / Check-in ─────────────────────────────────────────────────────────
+async function refreshPat(){
+  if(!myPatient) return;
+  try{
+    // Step 1: get today's appointments to find this patient's appointment_id
+    const apptRes = await api.getTodayAppointments();
+    const todayAppts = apptRes.data || [];
+    const myAppt = todayAppts.find(a => a.patient_id === myPatient.patient_id);
+
+    if(!myAppt){
+      $('status-in').classList.add('hidden');
+      $('status-out').classList.remove('hidden');
+      return;
+    }
+
+    // Step 2: find queue entry by appointment_id
+    const qRes = await api.getQueue();
+    const entries = qRes.data || [];
+    const entry = entries.find(q =>
+      q.appointment_id === myAppt.appointment_id &&
+      (q.status === 'CheckedIn' || q.status === 'Consulting')
+    );
+
+    if(entry){
+      $('status-in').classList.remove('hidden');
+      $('status-out').classList.add('hidden');
+      $('pat-qn').textContent = '#' + entry.queue_position;
+
+      // Patients ahead (lower queue_position, same active statuses)
+      const ahead = entries.filter(q =>
+        (q.status==='CheckedIn'||q.status==='Consulting') &&
+        q.queue_position < entry.queue_position
+      ).length;
+      $('pat-ahead').textContent = ahead;
+
+      // Rolling average from backend
+      try{
+        const avgRes = await api.getRollingAvg();
+        const avg = Math.round(avgRes.data?.avg_minutes || 15);
+        $('pat-avg').textContent = avg;
+        const wait = entry.estimated_wait_minutes != null
+          ? entry.estimated_wait_minutes
+          : ahead * avg;
+        $('pat-wt').textContent = wait > 0
+          ? 'Estimated wait: ' + wait + ' minutes'
+          : 'Doctor is ready for you!';
+      }catch{
+        const wait = ahead * 15;
+        $('pat-avg').textContent = 15;
+        $('pat-wt').textContent = wait > 0 ? 'Estimated wait: ' + wait + ' minutes' : 'Doctor is ready for you!';
+      }
+    } else {
+      $('status-in').classList.add('hidden');
+      $('status-out').classList.remove('hidden');
+    }
+  }catch(err){
+    console.warn('refreshPat error:', err);
+    $('status-in').classList.add('hidden');
+    $('status-out').classList.remove('hidden');
+  }
+}
+
+// Simulate check-in button — calls real API
+async function simMyCI(){
+  if(!myPatient) return;
+  try{
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Checking in…';
+    await api.checkin({ patient_id: myPatient.patient_id, source: 'Manual' });
+    await refreshPat();
+  }catch(err){
+    alert('❌ Check-in failed: ' + (err.message || 'Unknown error'));
+  } finally {
+    const btn = document.querySelector('#status-out button');
+    if(btn){ btn.disabled = false; btn.textContent = '📷 Simulate My Check-In'; }
+  }
+}
+
+// ── QR Card ───────────────────────────────────────────────────────────────────
+function renderMyCard(){
+  if(!myPatient) return;
+  $('my-pname').textContent = myPatient.full_name;
+  $('my-ppid').textContent  = myPatient.patient_id;
+  $('my-pidnum').textContent = 'ID: ' + (myPatient.id_number || '—');
+  const d = $('my-qr');
+  d.innerHTML = '';
+  new QRCode(d,{
+    text: myPatient.patient_id,
+    width:140, height:140,
+    colorDark:'#006B60', colorLight:'#fff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function loadImageDataURL(url){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      c.getContext('2d').drawImage(img,0,0);
+      try{ resolve(c.toDataURL('image/png')); } catch(e){ reject(e); }
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = url;
+  });
+}
+
+async function downloadMyCard(){
+  const p = myPatient; if(!p) return;
+  let canvas = document.querySelector('#my-qr canvas');
+  if(!canvas){ renderMyCard(); canvas = document.querySelector('#my-qr canvas'); }
+  if(!canvas){ alert('QR not ready'); return; }
+  const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+  if(!jsPDF){ alert('PDF library failed to load. Please refresh and try again.'); return; }
+  const doc = new jsPDF({unit:'mm',format:[85,54]});
+  doc.setFillColor(7,53,48); doc.rect(0,0,85,54,'F');
+  try{
+    const logoData = await loadImageDataURL('https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg');
+    doc.addImage(logoData,'PNG',5,5,12,12);
+  }catch{
+    doc.setFillColor(0,200,150); doc.roundedRect(5,5,12,12,2,2,'F');
+    doc.setFillColor(255,255,255); doc.rect(9.5,7,3,8,'F'); doc.rect(7,10,8,3,'F');
+  }
+  doc.setTextColor(255,255,255); doc.setFont('courier','bold'); doc.setFontSize(9); doc.text('SmartClinic',20,10);
+  doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(178,223,219); doc.text('OFFICIAL CLINIC CARD',20,14.5);
   doc.addImage(canvas.toDataURL('image/png'),'PNG',5,18,26,26);
-  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.text(p.full_name,34,22);
-  doc.setFont('courier','bold');doc.setFontSize(10);doc.setTextColor(0,200,150);doc.text(p.patient_id,34,29);
-  doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(178,223,219);doc.text('ID: '+p.id_number,34,35);
-  doc.setFontSize(5.5);doc.setTextColor(80,140,130);doc.text('Keep this card safe. Present at every visit.',5,51);
+  const nameLines = doc.splitTextToSize(String(p.full_name||''),42);
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+  doc.text(nameLines,34,22);
+  const afterNameY = 22 + (nameLines.length * 6);
+  doc.setFont('courier','bold'); doc.setFontSize(10); doc.setTextColor(0,200,150); doc.text(String(p.patient_id||''),34,afterNameY+6);
+  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(178,223,219); doc.text('ID: '+String(p.id_number||''),34,afterNameY+12);
+  doc.setFontSize(5.5); doc.setTextColor(80,140,130); doc.text('Keep this card safe. Present at every visit.',5,50);
   doc.save('SmartClinic-Card-'+p.patient_id+'.pdf');
 }
 
-function renderMyAppts(){
-  if(!myPatient)return;
-  const appts=SC.appointments.filter(a=>a.patient_id===myPatient.patient_id);
-  const c=$('my-appts');
-  if(!appts.length){c.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:28px">No appointments found.</div>';return;}
-  c.innerHTML=appts.map(a=>`<div class="appt-row"><div class="at">${fmtDateTime(a.datetime)}</div><div class="ad">${a.doctor}</div><div class="ar">${a.reason||'—'}</div><span class="badge badge-${a.status==='Booked'?'amber':'green'}" style="margin-top:6px">${a.status}</span></div>`).join('');
+// ── Appointments ──────────────────────────────────────────────────────────────
+async function renderMyAppts(){
+  if(!myPatient) return;
+  const c = $('my-appts');
+  c.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px">Loading…</div>';
+  try{
+    // Load doctors cache so we can resolve names
+    await getDoctorsCache();
+    const res = await api.getAppointments();
+    const appts = (res.data || []).filter(a => a.patient_id === myPatient.patient_id);
+    if(!appts.length){
+      c.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:28px">No appointments found.</div>';
+      return;
+    }
+    // Sort newest first
+    appts.sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+    c.innerHTML = appts.map(a=>{
+      const dName = a.doctor_name || doctorName(a.doctor_id);
+      const dt = new Date(a.datetime).toLocaleString('en-ZA',{dateStyle:'medium',timeStyle:'short'});
+      const badgeColor = a.status==='Booked'?'amber': a.status==='CheckedIn'?'green': a.status==='Completed'?'green':'amber';
+      return `
+      <div class="appt-row">
+        <div class="at">${dt}</div>
+        <div class="ad">${dName}</div>
+        <div class="ar">${a.reason||'—'}</div>
+        <span class="badge badge-${badgeColor}" style="margin-top:6px">${a.status}</span>
+      </div>`;
+    }).join('');
+  }catch(err){
+    c.innerHTML='<div style="text-align:center;color:#ef4444;padding:20px">Failed to load appointments.</div>';
+    console.warn('renderMyAppts error:',err);
+  }
 }
 
-refreshPat();setInterval(refreshPat,5000);
-document.addEventListener('sensor2tick',refreshPat);
+async function loadDoctors(){
+  const sel = $('appt-doc');
+  if(sel.options.length > 1) return; // already loaded
+  try{
+    const doctors = await getDoctorsCache();
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    $('appt-date').min = tomorrow.toISOString().slice(0,10);
+    doctors.forEach(d=>{
+      const opt = document.createElement('option');
+      opt.value = d.doctor_id;
+      opt.textContent = d.name + ' (' + (d.department||'General') + ')';
+      sel.appendChild(opt);
+    });
+  }catch(e){
+    console.warn('Failed to load doctors:',e);
+    sel.innerHTML='<option value="">Error loading doctors</option>';
+  }
+}
+
+function validateApptForm(){
+  const doc=$('appt-doc').value.trim(),date=$('appt-date').value.trim(),time=$('appt-time').value.trim();
+  const errEl=$('appt-error'),btn=$('appt-btn');
+  errEl.style.display='none'; btn.disabled=true;
+  if(!doc||!date||!time){ errEl.textContent='⚠ Please select doctor, date, and time'; errEl.style.display='block'; return false; }
+  const today=new Date(); today.setHours(0,0,0,0);
+  const tomorrow=new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  const sel=new Date(date); sel.setHours(0,0,0,0);
+  if(sel<tomorrow){ errEl.textContent='⚠ Can only book from tomorrow onwards'; errEl.style.display='block'; return false; }
+  const [h,m]=time.split(':').map(Number);
+  if(h<8||h>17||(h===17&&m>0)){ errEl.textContent='⚠ Bookings only 8:00 AM – 5:00 PM'; errEl.style.display='block'; return false; }
+  btn.disabled=false; return true;
+}
+
+async function bookAppointment(){
+  if(!validateApptForm()) return;
+  if(!myPatient){ alert('Session lost. Please log in again.'); return; }
+  const doc_id=$('appt-doc').value.trim(),date=$('appt-date').value.trim(),time=$('appt-time').value.trim(),reason=$('appt-reason').value.trim();
+  const datetime=date+'T'+time;
+  const btn=$('appt-btn'); btn.disabled=true; btn.textContent='Booking…';
+  try{
+    await api.createAppointment({
+      patient_id: myPatient.patient_id,
+      doctor_id:  doc_id,
+      datetime,
+      reason: reason || 'General visit'
+    });
+    alert('✅ Appointment booked successfully!');
+    $('appt-doc').value=''; $('appt-date').value=''; $('appt-time').value=''; $('appt-reason').value='';
+    validateApptForm();
+    renderMyAppts();
+  }catch(err){
+    alert('❌ Booking failed: '+(err.message||'Unknown error'));
+  }finally{
+    btn.disabled=false; btn.textContent='📅 Book Appointment';
+  }
+}
+
+// ── Clock & polling ───────────────────────────────────────────────────────────
+function tickClock(){
+  const cl=$('clock'); if(cl) cl.textContent=new Date().toLocaleTimeString();
+}
+tickClock(); setInterval(tickClock,1000);
+setInterval(refreshPat, 5000);
 </script>
 </body>
 </html>

@@ -5,22 +5,34 @@
 <title>SmartClinic — Admin</title>
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.bar-lbl{width:90px;font-size:.75rem;color:var(--text-dim);text-align:right;flex-shrink:0}
-.bar-track{flex:1;background:rgba(255,255,255,.07);border-radius:99px;height:12px;overflow:hidden}
-.bar-fill{height:100%;border-radius:99px;transition:width .6s ease,background .4s}
-.bar-val{width:36px;font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--green)}
 .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
-.kpi-val{font-family:var(--mono);font-size:2.6rem;font-weight:700;color:var(--green);line-height:1}
+.kpi-val{font-family:var(--mono);font-size:2.4rem;font-weight:700;color:var(--green);line-height:1}
 .kpi-lbl{font-size:.72rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.bar-lbl{width:100px;font-size:.75rem;color:var(--text-dim);text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:rgba(255,255,255,.07);border-radius:99px;height:12px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.bar-val{width:28px;font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--green)}
+.role-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.role-admin{background:rgba(74,158,255,.15);color:var(--blue)}
+.role-doctor{background:rgba(0,200,150,.15);color:var(--green)}
+.role-receptionist{background:rgba(255,179,71,.15);color:var(--amber)}
+.role-nurse{background:rgba(255,90,90,.15);color:var(--danger)}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.hidden{display:none!important}
+.fade-in{animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.live-dot{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--green);font-weight:600}
+.live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.stat-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--green)}
+.stat-lbl{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
 .pbi-banner{background:linear-gradient(135deg,#1a1f6e,#2d3ac9);border-radius:14px;padding:22px 26px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.pbi-banner h3{font-size:1.05rem;font-weight:700;margin-bottom:4px}
-.pbi-banner p{font-size:.82rem;opacity:.75}
-.pbi-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:9px 18px;border-radius:10px;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.pbi-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:9px 18px;border-radius:10px;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer}
 .pbi-btn:hover{background:rgba(255,255,255,.25)}
-.doc-contact-row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--border);font-size:.875rem}
-.doc-contact-row:last-child{border-bottom:none}
-.dc-num{font-family:var(--mono);color:var(--green);font-size:.8rem;margin-left:auto}
+.err-msg{font-size:.72rem;color:var(--danger);margin-top:4px;display:none}
 </style>
 </head>
 <body>
@@ -28,7 +40,7 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic" style="height:26px;width:auto;border-radius:6px;object-fit:contain">
       <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
     </div>
     <div class="role-pill">Admin</div>
@@ -36,25 +48,23 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">Analytics</div>
     <a class="nav-item active" href="#" onclick="return go('overview',event)"><span class="icon">📊</span>Overview</a>
-    <a class="nav-item" href="#" onclick="return go('sensors',event)"><span class="icon">📡</span>Sensor Data</a>
-    <a class="nav-item" href="#" onclick="return go('predictions',event)"><span class="icon">⏱</span>Predictions</a>
+    <a class="nav-item" href="#" onclick="return go('staff',event)"><span class="icon">👨‍⚕️</span>Staff</a>
     <a class="nav-item" href="#" onclick="return go('patients',event)"><span class="icon">👥</span>Patients</a>
-    <a class="nav-item" href="#" onclick="return go('contacts',event)"><span class="icon">📞</span>Doctor Contacts</a>
+    <a class="nav-item" href="#" onclick="return go('appointments',event)"><span class="icon">📅</span>Appointments</a>
+    <a class="nav-item" href="#" onclick="return go('queue',event)"><span class="icon">🖥</span>Queue</a>
+    <a class="nav-item" href="#" onclick="return go('sensors',event)"><span class="icon">📡</span>Sensor Data</a>
     <div class="nav-section-label">System</div>
     <a class="nav-item" href="#" onclick="return go('powerbi',event)"><span class="icon">📈</span>Power BI</a>
   </nav>
   <div class="sidebar-footer">
-    <div class="user-chip">
-      <div class="av" id="sb-av">LM</div>
-      <div class="info"><div class="uname" id="sb-name">Lungelo Mthethwa</div><div class="urole">Administrator</div></div>
-    </div>
+    <div class="user-chip"><div class="av" id="sb-av">AD</div><div class="info"><div class="uname" id="sb-name">Admin</div><div class="urole">Administrator</div></div></div>
     <button class="btn btn-outline btn-sm btn-block" style="margin-top:10px" onclick="logout()">Sign Out</button>
   </div>
 </aside>
 
 <div class="main-content">
   <div class="topbar">
-    <div><div class="topbar-title" id="pg-title">Overview</div><div class="topbar-meta" id="pg-meta">SmartClinic analytics dashboard</div></div>
+    <div><div class="topbar-title" id="pg-title">Overview</div><div class="topbar-meta" id="pg-meta">Live from database</div></div>
     <div class="topbar-right">
       <span class="live-dot">Live Data</span>
       <span style="font-size:.78rem;color:var(--text-dim)" id="clock"></span>
@@ -63,113 +73,244 @@
   <div class="page-body">
 
     <!-- OVERVIEW -->
-    <div id="sec-overview">
-      <div class="g4 fade-in" style="margin-bottom:18px">
-        <div class="kpi-card"><div class="kpi-val" id="kpi-pat">0</div><div class="kpi-lbl">Total Patients</div></div>
-        <div class="kpi-card"><div class="kpi-val" id="kpi-ci">0</div><div class="kpi-lbl">Check-Ins Today</div></div>
-        <div class="kpi-card"><div class="kpi-val" id="kpi-avg">15m</div><div class="kpi-lbl">Avg Consult Time</div></div>
-        <div class="kpi-card"><div class="kpi-val" id="kpi-acc">—</div><div class="kpi-lbl">Prediction Accuracy</div></div>
+    <div id="sec-overview" class="fade-in">
+      <div class="g4" style="margin-bottom:18px">
+        <div class="kpi-card"><div class="kpi-val" id="kpi-patients">—</div><div class="kpi-lbl">Total Patients</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="kpi-doctors">—</div><div class="kpi-lbl">Doctors</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="kpi-appts">—</div><div class="kpi-lbl">Appointments</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="kpi-occ">—</div><div class="kpi-lbl">Live Occupancy</div></div>
       </div>
-      <div class="g2 fade-in" style="align-items:start;margin-bottom:18px">
+      <div class="g2" style="margin-bottom:18px">
         <div class="card">
-          <div class="card-title">Occupancy Trend (Last 8 Sensor 2 Ticks)</div>
-          <div id="occ-chart" style="padding-top:6px"><div style="text-align:center;color:var(--text-dim);padding:20px;font-size:.82rem">No occupancy data yet. Sensor 2 runs every 10 seconds.</div></div>
+          <div class="card-title">Appointment Status Breakdown</div>
+          <div id="appt-chart"><p style="color:var(--text-dim);font-size:.82rem">Loading...</p></div>
         </div>
         <div class="card">
-          <div class="card-title">Queue Status Breakdown</div>
-          <div id="status-chart"><div style="text-align:center;color:var(--text-dim);padding:20px;font-size:.82rem">No queue data yet.</div></div>
+          <div class="card-title">Occupancy — Last 8 Sensor Readings</div>
+          <div id="occ-chart"><p style="color:var(--text-dim);font-size:.82rem">Loading...</p></div>
         </div>
       </div>
-      <div class="g2 fade-in">
+      <div class="g2">
         <div class="card">
-          <div class="card-title">Sensor 1 — SmartCheckIn</div>
-          <div class="g2" style="gap:12px;margin-bottom:12px">
-            <div class="stat-box" style="padding:14px"><div class="stat-val" id="s1-tot" style="font-size:1.8rem">0</div><div class="stat-lbl">Readings</div></div>
-            <div class="stat-box" style="padding:14px"><div class="stat-val" id="s1-qr" style="font-size:1.8rem">0</div><div class="stat-lbl">QR Scans</div></div>
-          </div>
+          <div class="card-title">Doctors by Department</div>
+          <div id="dept-chart"><p style="color:var(--text-dim);font-size:.82rem">Loading...</p></div>
         </div>
         <div class="card">
-          <div class="card-title">Sensor 2 — ActiveQueueOccupancy</div>
-          <div class="g2" style="gap:12px;margin-bottom:12px">
-            <div class="stat-box" style="padding:14px"><div class="stat-val" id="s2-tot" style="font-size:1.8rem">0</div><div class="stat-lbl">Ticks</div></div>
-            <div class="stat-box" style="padding:14px"><div class="stat-val" id="s2-peak" style="font-size:1.8rem">0</div><div class="stat-lbl">Peak Occupancy</div></div>
+          <div class="card-title">System Status</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem"><span>Backend API</span><span class="badge badge-green">● Online</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem"><span>Supabase Database</span><span class="badge badge-green">● Connected</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem"><span>Sensor 2 (Occupancy)</span><span class="badge badge-green" id="s2-status">● Active</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem"><span>Last sensor tick</span><span style="font-family:var(--mono);font-size:.75rem;color:var(--text-dim)" id="last-tick">—</span></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SENSORS -->
-    <div id="sec-sensors" class="hidden">
-      <div class="card">
-        <div class="section-header"><h3>All SENSOR_READINGS</h3><div class="flex gap-8"><span class="badge badge-green">Sensor 1</span><span class="badge badge-amber">Sensor 2</span></div></div>
-        <div class="tbl-wrap" style="max-height:520px;overflow-y:auto"><table><thead><tr><th>ID</th><th>Sensor</th><th>Source</th><th>Patient</th><th>Occupancy</th><th>Time</th></tr></thead><tbody id="sr-tbody"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- PREDICTIONS -->
-    <div id="sec-predictions" class="hidden">
+    <!-- STAFF -->
+    <div id="sec-staff" class="hidden fade-in">
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Prediction Model Formula</div>
-        <div style="background:rgba(0,200,150,.05);border:1px dashed rgba(0,200,150,.25);border-radius:10px;padding:13px;font-family:var(--mono);font-size:.8rem;color:var(--green);white-space:pre-wrap" id="admin-formula">Avg = default 15 min (no consultations completed yet)
-Formula: patientsAhead × rollingAvg = estimated wait</div>
+        <div class="section-header"><h3>System Users <span id="users-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3>
+          <div style="float:right">
+            <button class="btn btn-sm" onclick="openUserForm()">+ New Staff</button>
+          </div>
+        </div>
+        <!-- User form modal -->
+        <div id="user-modal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:60">
+          <div style="background:var(--card);padding:18px;border-radius:12px;min-width:360px;max-width:92%">
+            <h3 id="um-title" style="margin-bottom:8px">New Staff</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <input id="um-full_name" placeholder="Full name" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="um-email" type="email" placeholder="Email" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <select id="um-role" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+                <option value="admin">Admin</option>
+                <option value="receptionist">Receptionist</option>
+                <option value="doctor">Doctor</option>
+                <option value="nurse">Nurse</option>
+              </select>
+              <input id="um-password" type="password" placeholder="Password" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <label style="font-size:.85rem"><input id="um-active" type="checkbox" checked> Active</label>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+              <button class="btn btn-outline btn-sm" onclick="closeUserForm()">Cancel</button>
+              <button class="btn btn-sm" id="um-save" onclick="saveUser()">Save</button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="users-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
       </div>
       <div class="card">
-        <div class="card-title">PREDICTION_LOGS</div>
-        <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Queue #</th><th>Estimated</th><th>Actual</th><th>Accuracy</th><th>Logged</th></tr></thead><tbody id="pl-tbody"></tbody></table></div>
+        <div class="section-header"><h3>Doctors <span id="doctors-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3>
+          <div style="float:right"><button class="btn btn-sm" onclick="openDoctorForm()">+ New Doctor</button></div>
+        </div>
+        <!-- Doctor modal -->
+        <div id="doctor-modal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:60">
+          <div style="background:var(--card);padding:18px;border-radius:12px;min-width:360px;max-width:92%">
+            <h3 id="dm-title" style="margin-bottom:8px">New Doctor</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <input id="dm-name" placeholder="Full name" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="dm-department" placeholder="Department" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="dm-specialisation" placeholder="Specialisation" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="dm-contact" placeholder="Contact" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="dm-email" type="email" placeholder="Email" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+              <button class="btn btn-outline btn-sm" onclick="closeDoctorForm()">Cancel</button>
+              <button class="btn btn-sm" id="dm-save" onclick="saveDoctor()">Save</button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Department</th><th>Specialisation</th><th>Contact</th><th>Email</th><th>Actions</th></tr></thead><tbody id="doctors-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
       </div>
     </div>
 
     <!-- PATIENTS -->
-    <div id="sec-patients" class="hidden">
+    <div id="sec-patients" class="hidden fade-in">
       <div class="card">
-        <div class="section-header"><h3>All Patients <span id="pt-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3></div>
-        <div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>SA ID</th><th>Contact</th><th>Email</th><th>Registered</th></tr></thead><tbody id="pt-tbody"></tbody></table></div>
+        <div class="section-header"><h3>All Patients <span id="pt-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3>
+          <div style="float:right">
+            <button class="btn btn-sm" onclick="openPatientForm()">+ New Patient</button>
+          </div>
+        </div>
+        <!-- Patient form modal -->
+        <div id="patient-modal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:60">
+          <div style="background:var(--card);padding:18px;border-radius:12px;min-width:360px;max-width:92%">
+            <h3 id="pm-title" style="margin-bottom:8px">New Patient</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <input id="pm-full_name" placeholder="Full name" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="pm-id_number" placeholder="ID number (13 digits)" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="pm-dob" type="date" placeholder="Date of birth" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="pm-contact" placeholder="Contact" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="pm-email" type="email" placeholder="Email" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+              <button class="btn btn-outline btn-sm" onclick="closePatientForm()">Cancel</button>
+              <button class="btn btn-sm" id="pm-save" onclick="savePatient()">Save</button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>SA ID</th><th>Date of Birth</th><th>Contact</th><th>Email</th><th>Registered</th></tr></thead><tbody id="pt-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
       </div>
     </div>
 
-    <!-- DOCTOR CONTACTS -->
-    <div id="sec-contacts" class="hidden">
-      <div class="card" style="max-width:520px">
-        <div class="card-title">Doctor Directory &amp; Contact Numbers</div>
-        <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">All registered clinic doctors with direct contact numbers.</p>
-        <div id="admin-contacts"></div>
+    <!-- APPOINTMENTS -->
+    <div id="sec-appointments" class="hidden fade-in">
+      <div class="card">
+        <div class="section-header"><h3>All Appointments <span id="ap-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3>
+          <div style="float:right"><button class="btn btn-sm" onclick="openAppointmentForm()">+ New Appointment</button></div>
+        </div>
+        <!-- Appointment modal -->
+        <div id="appt-modal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:60">
+          <div style="background:var(--card);padding:18px;border-radius:12px;min-width:380px;max-width:96%">
+            <h3 id="am-title" style="margin-bottom:8px">New Appointment</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <select id="am-patient" style="padding:10px;border-radius:8px;border:1px solid var(--border)"></select>
+              <select id="am-doctor" style="padding:10px;border-radius:8px;border:1px solid var(--border)"></select>
+              <input id="am-datetime" type="datetime-local" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <input id="am-reason" placeholder="Reason" style="padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <div id="am-error" class="alert hidden" style="margin-top:8px"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+              <button class="btn btn-outline btn-sm" onclick="closeAppointmentForm()">Cancel</button>
+              <button class="btn btn-sm" id="am-save" onclick="saveAppointment()">Save</button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Department</th><th>Date & Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ap-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- QUEUE -->
+    <div id="sec-queue" class="hidden fade-in">
+      <div class="card">
+        <div class="section-header"><h3>Live Queue <span id="q-count" style="font-family:var(--mono);font-size:.82rem;color:var(--text-dim)"></span></h3><button class="btn btn-outline btn-sm" onclick="loadQueue()">↻ Refresh</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>Checked In</th><th>Status</th></tr></thead><tbody id="q-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SENSORS -->
+    <div id="sec-sensors" class="hidden fade-in">
+      <div class="g2" style="margin-bottom:16px">
+        <div class="stat-box"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Total Readings</div></div>
+        <div class="stat-box"><div class="stat-val" id="s-peak">—</div><div class="stat-lbl">Peak Occupancy</div></div>
+      </div>
+      <div class="card">
+        <div class="section-header"><h3>Sensor Readings</h3><div style="display:flex;gap:8px"><span class="badge badge-green">S1 QR Scan</span><span class="badge badge-amber">S2 Occupancy</span></div></div>
+        <div class="tbl-wrap" style="max-height:520px;overflow-y:auto"><table><thead><tr><th>Type</th><th>Source</th><th>Occupancy</th><th>Patient</th><th>Timestamp</th></tr></thead><tbody id="sr-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">Loading...</td></tr></tbody></table></div>
       </div>
     </div>
 
     <!-- POWER BI -->
-    <div id="sec-powerbi" class="hidden">
-      <div class="pbi-banner fade-in" style="margin-bottom:18px">
-        <div><h3>📊 Power BI Dashboard</h3><p>Connect Supabase tables to Power BI for live visual analytics</p></div>
-        <button class="pbi-btn" onclick="alert('In production: paste your Power BI embed URL into the iframe placeholder below.')">Open Dashboard →</button>
+    <div id="sec-powerbi" class="hidden fade-in">
+      <div class="pbi-banner" style="margin-bottom:18px">
+        <div><h3 style="margin-bottom:4px">📊 Power BI Dashboard</h3><p style="font-size:.82rem;opacity:.75">Executive analytics from your live Supabase data</p></div>
+        <button class="pbi-btn" onclick="loadPowerBI()">Refresh Data</button>
       </div>
-      <div class="g2 fade-in" style="align-items:start;margin-bottom:18px">
-        <div class="card">
-          <div class="card-title">Connection Setup</div>
-          <ol style="font-size:.82rem;line-height:2.1;padding-left:18px;color:var(--text)">
-            <li>Open Power BI Desktop</li>
-            <li>Get Data → PostgreSQL database</li>
-            <li>Server: <code>db.your-project.supabase.co</code></li>
-            <li>Database: <code>postgres</code> · Port: <code>5432</code></li>
-            <li>Import: <code>sensor_readings</code>, <code>prediction_logs</code>, <code>queue_entries</code></li>
-            <li>Publish to Power BI Service</li>
-            <li>Copy embed URL → paste in iframe below</li>
-          </ol>
-        </div>
-        <div class="card">
-          <div class="card-title">Recommended Visuals</div>
-          <div style="display:flex;flex-direction:column;gap:9px;font-size:.82rem">
-            <div style="padding:10px 13px;background:rgba(0,200,150,.06);border-radius:10px">📈 <b>Occupancy Over Time</b> — Line chart from sensor_readings where sensor_type = ActiveQueueOccupancy</div>
-            <div style="padding:10px 13px;background:rgba(0,200,150,.06);border-radius:10px">🎯 <b>Prediction Accuracy</b> — Clustered bar: estimated_wait vs actual_wait from prediction_logs</div>
-            <div style="padding:10px 13px;background:rgba(0,200,150,.06);border-radius:10px">📊 <b>Daily Check-Ins</b> — Column chart grouping sensor_readings by date</div>
-            <div style="padding:10px 13px;background:rgba(0,200,150,.06);border-radius:10px">🔢 <b>KPI Cards</b> — Total patients, avg consult time, peak occupancy</div>
+      <div id="pb-dash" class="card" style="min-height:640px;position:relative;overflow:hidden;">
+        <style>
+          /* Scoped Power BI dashboard styles */
+          #pb-dash{background:linear-gradient(180deg,#071220 0%,#0d1b32 100%);border-radius:24px;color:#d8ecff;padding:24px;box-shadow:0 28px 90px rgba(0,0,0,.25)}
+          #pb-dash .pb-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+          #pb-dash .pb-head .title{font-size:1.35rem;font-weight:800;color:#a8d8ff;letter-spacing:.3px}
+          #pb-dash .pb-head .desc{margin-top:6px;color:#afc9e8;font-size:.95rem;line-height:1.5}
+          #pb-dash .live-wrap{display:flex;align-items:center;gap:10px;color:#9fd2ff;font-size:.88rem}
+          #pb-dash .live-dot{width:10px;height:10px;border-radius:50%;background:#3ae7b6;box-shadow:0 0 18px rgba(58,231,182,.35);animation:pb-pulse 1.6s infinite}
+          @keyframes pb-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.86)}}
+          #pb-dash .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
+          #pb-dash .kpi{background:rgba(255,255,255,.04);padding:18px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.06);text-align:left;min-height:108px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+          #pb-dash .kpi .val{font-size:1.8rem;font-weight:800;color:#c1f5ff;line-height:1}
+          #pb-dash .kpi .lbl{font-size:.78rem;color:#a6c9e7;margin-top:10px;letter-spacing:.01em;text-transform:uppercase}
+          #pb-dash .layout{display:grid;grid-template-columns:1.7fr 1fr;gap:20px;align-items:start}
+          #pb-dash .left-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+          #pb-dash .right-column{display:grid;grid-template-rows:minmax(300px,1fr) minmax(280px,1fr);gap:20px}
+          #pb-dash .panel{background:rgba(255,255,255,.04);border-radius:22px;padding:18px;border:1px solid rgba(255,255,255,.06);overflow:hidden;display:flex;flex-direction:column;min-height:280px}
+          #pb-dash .panel h4{margin:0 0 16px 0;font-size:1rem;color:#cbe7ff}
+          #pb-dash .panel canvas{width:100%!important;height:280px!important;display:block}
+          #pb-dash table{width:100%;border-collapse:collapse;font-size:.9rem}
+          #pb-dash th,#pb-dash td{padding:12px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);color:#d8eeff}
+          #pb-dash th{color:#96c7ff;font-weight:700}
+          #pb-dash .small-table{max-height:280px;overflow:auto}
+          #pb-dash .panel .badge{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;font-weight:700;font-size:.75rem}
+          .status-scheduled{background:rgba(43,140,255,0.16);color:#7ac2ff}
+          .status-completed{background:rgba(20,200,120,0.14);color:#93e5b6}
+          .status-pending{background:rgba(255,203,86,0.16);color:#ffe584}
+          .status-cancelled{background:rgba(255,91,128,0.16);color:#ffb1c2}
+          @media (max-width:980px){
+            #pb-dash .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+            #pb-dash .layout{grid-template-columns:1fr}
+            #pb-dash .left-grid{grid-template-columns:1fr}
+            #pb-dash .right-column{grid-template-rows:auto auto}
+          }
+        </style>
+
+        <div class="pb-head">
+          <div>
+            <div class="title">SmartClinic Executive Analytics</div>
+            <div class="desc">A clean executive summary of appointments, staff, and patient activity generated directly from your Supabase data.</div>
           </div>
+          <div class="live-wrap"><div class="live-dot"></div><div id="pb-clock" style="font-family:var(--mono)">Loading...</div></div>
         </div>
-      </div>
-      <div class="card fade-in" style="min-height:380px;display:flex;align-items:center;justify-content:center;border:2px dashed var(--border)">
-        <div style="text-align:center;color:var(--text-dim)">
-          <div style="font-size:3rem;margin-bottom:12px">📊</div>
-          <div style="font-weight:600;margin-bottom:6px">Power BI Embed Placeholder</div>
-          <div style="font-size:.8rem;max-width:340px;line-height:1.6">Replace this block with:<br><code style="font-size:.72rem">&lt;iframe src="https://app.powerbi.com/reportEmbed?..." /&gt;</code></div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="val" id="kp-patients">—</div><div class="lbl">Total Patients</div></div>
+          <div class="kpi"><div class="val" id="kp-appointments">—</div><div class="lbl">Total Appointments</div></div>
+          <div class="kpi"><div class="val" id="kp-staff">—</div><div class="lbl">Total Staff</div></div>
+          <div class="kpi"><div class="val" id="kp-queue">—</div><div class="lbl">Active Queue</div></div>
+        </div>
+
+        <div class="layout">
+          <div class="left-grid">
+            <div class="panel" style="min-height:260px"><h4>Appointments by Month</h4><canvas id="chart-registrations" style="height:240px"></canvas></div>
+            <div class="panel" style="min-height:260px"><h4>Appointments by Doctor</h4><canvas id="chart-doctor" style="height:240px"></canvas></div>
+            <div class="panel" style="min-height:260px"><h4>Visits by Department</h4><canvas id="chart-department" style="height:240px"></canvas></div>
+            <div class="panel" style="min-height:260px"><h4>Appointment Status Breakdown</h4><canvas id="chart-status" style="height:240px"></canvas></div>
+          </div>
+
+          <div class="right-column">
+            <div class="panel small-table"><h4>Recent Appointments</h4><table id="recent-appts"><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr></thead><tbody><tr><td colspan="4" style="text-align:center;color:#9fcfff;padding:24px">Loading...</td></tr></tbody></table></div>
+            <div class="panel" style="min-height:320px"><h4>User Roles Breakdown</h4><canvas id="chart-roles" style="height:240px"></canvas></div>
+            <div class="panel small-table" style="overflow:auto;max-height:260px;margin-top:12px"><h4>User Registry</h4><table id="user-registry"><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody><tr><td colspan="3" style="text-align:center;color:#9fcfff;padding:24px">Loading...</td></tr></tbody></table></div>
+          </div>
         </div>
       </div>
     </div>
@@ -178,77 +319,885 @@ Formula: patientsAhead × rollingAvg = estimated wait</div>
 </div>
 </div>
 
-<script src="../js/api.js"></script>
+<!-- Fallback utilities in case api.js fails to load -->
 <script>
-const user=requireAuth('admin');
-if(user){const displayName=user.full_name||user.name||'Administrator';$('sb-name').textContent=displayName;$('sb-av').textContent=displayName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();}
-function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
+if(!window.$) { window.$ = (id) => document.getElementById(id); }
+if(!window.getUser) { window.getUser = () => { try { return JSON.parse(sessionStorage.getItem('sc_user')); } catch { return null; } }; }
+if(!window.requireAuth) { window.requireAuth = (role) => { const u = getUser(); if (!u) { window.location.href = '../login.html'; return null; } if (role && u.role !== role) { window.location.href = '../login.html'; return null; } return u; }; }
+if(!window.logout) { window.logout = () => { sessionStorage.removeItem('sc_user'); window.location.href = '../login.html'; }; }
 
-var SECS={overview:'sec-overview',sensors:'sec-sensors',predictions:'sec-predictions',patients:'sec-patients',contacts:'sec-contacts',powerbi:'sec-powerbi'};
-var TITLES={overview:'Overview',sensors:'Sensor Data',predictions:'Predictions',patients:'Patients',contacts:'Doctor Contacts',powerbi:'Power BI'};
-var METAS={overview:'SmartClinic analytics dashboard',sensors:'Raw SENSOR_READINGS data',predictions:'PREDICTION_LOGS — wait-time accuracy',patients:'All registered patients',contacts:'Clinic doctor directory',powerbi:'Power BI integration guide'};
-function go(name,evt){
-  evt = evt || window.event;
+// Define navigation early to ensure it's always available
+window.SECS = {overview:'sec-overview',staff:'sec-staff',patients:'sec-patients',appointments:'sec-appointments',queue:'sec-queue',sensors:'sec-sensors',powerbi:'sec-powerbi'};
+window.TITLES = {overview:'Overview',staff:'Staff',patients:'Patients',appointments:'Appointments',queue:'Live Queue',sensors:'Sensor Data',powerbi:'Power BI'};
+window.METAS = {overview:'Live from database',staff:'System users & doctors',patients:'Registered patients',appointments:'All appointments',queue:'Current queue status',sensors:'IoT sensor readings',powerbi:'Executive dashboard'};
+
+window.go = function(name, evt){
   if(evt && evt.preventDefault) evt.preventDefault();
-  Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
+  Object.keys(window.SECS).forEach(k => { const e = $(window.SECS[k]); if(e) e.classList.add('hidden'); });
+  const target = $(window.SECS[name]); if(target) target.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if(evt && evt.target && evt.target.closest) { const nav = evt.target.closest('.nav-item'); if(nav) nav.classList.add('active'); }
+  const titleEl = $('pg-title'); if(titleEl) titleEl.textContent = window.TITLES[name];
+  const metaEl = $('pg-meta'); if(metaEl) metaEl.textContent = window.METAS[name];
+  return false;
+};
+</script>
+
+<script src="../js/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Chart.js global defaults for consistent styling
+if(window.Chart){
+  Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+  Chart.defaults.color = '#cfeeff';
+  Chart.defaults.plugins = Chart.defaults.plugins || {};
+  if(Chart.defaults.plugins.legend) Chart.defaults.plugins.legend.labels = Chart.defaults.plugins.legend.labels || {};
+  if(Chart.defaults.plugins.legend) Chart.defaults.plugins.legend.labels.color = '#cfeeff';
+  Chart.defaults.plugins.legend = Chart.defaults.plugins.legend || {};
+  Chart.defaults.plugins.legend.position = 'bottom';
+  Chart.defaults.maintainAspectRatio = false;
+}
+// Define navigation first (before auth check)
+const SECS = {overview:'sec-overview',staff:'sec-staff',patients:'sec-patients',appointments:'sec-appointments',queue:'sec-queue',sensors:'sec-sensors',powerbi:'sec-powerbi'};
+const TITLES = {overview:'Overview',staff:'Staff',patients:'Patients',appointments:'Appointments',queue:'Live Queue',sensors:'Sensor Data',powerbi:'Power BI'};
+const METAS = {overview:'Live from database',staff:'System users & doctors',patients:'Registered patients',appointments:'All appointments',queue:'Current queue status',sensors:'IoT sensor readings',powerbi:'Executive dashboard'};
+
+function go(name, evt){
+  if(evt && evt.preventDefault) evt.preventDefault();
+  Object.keys(SECS).forEach(k => $(SECS[k]).classList.add('hidden'));
   $(SECS[name]).classList.remove('hidden');
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   if(evt && evt.target) evt.target.closest('.nav-item').classList.add('active');
-  $('pg-title').textContent=TITLES[name];$('pg-meta').textContent=METAS[name];
-  refreshAdmin();
+  $('pg-title').textContent = TITLES[name];
+  $('pg-meta').textContent = METAS[name];
+  if(name==='staff') { loadUsers(); loadDoctors(); }
+  if(name==='patients') loadPatients();
+  if(name==='appointments') loadAppointments();
+  if(name==='queue') loadQueue();
+  if(name==='sensors') loadSensors();
+  if(name==='powerbi') loadPowerBI();
   return false;
 }
 
-function refreshAdmin(){
-  const s1=SC.sensorReadings.filter(r=>r.sensor_type==='SmartCheckIn');
-  const s2=SC.sensorReadings.filter(r=>r.sensor_type==='ActiveQueueOccupancy');
-  const done=SC.predictionLogs.filter(p=>p.actual!==null);
-  $('kpi-pat').textContent=SC.patients.length;
-  $('kpi-ci').textContent=SC.queueEntries.length;
-  $('kpi-avg').textContent=rollingAvg()+'m';
-  if(done.length){const acc=Math.round(done.reduce((s,p)=>s+Math.max(0,100-Math.abs((p.actual-p.estimated_wait)/Math.max(p.estimated_wait,1)*100)),0)/done.length);$('kpi-acc').textContent=acc+'%';}
-  $('s1-tot').textContent=s1.length;$('s1-qr').textContent=s1.filter(r=>r.source==='QR_Scan').length;
-  $('s2-tot').textContent=s2.length;$('s2-peak').textContent=s2.length?Math.max(...s2.map(r=>r.occupancy_level)):0;
+// Auth check (after functions are defined)
+const user = requireAuth('admin');
+async function loadOverview(){
+  try {
+    const _tok = sessionStorage.getItem('sc_token');
+    const res = await fetch('/api/powerbi/live', { headers: { 'Authorization': 'Bearer ' + _tok } });
+    const json = await res.json();
+    const data = json.data || {};
+    const patients = Array.isArray(data.patients) ? data.patients : [];
+    const doctors = Array.isArray(data.doctors) ? data.doctors : [];
+    const appts = Array.isArray(data.appointments) ? data.appointments : [];
+    const sensors = Array.isArray(data.sensors) ? data.sensors : [];
+    const queue = Array.isArray(data.queue) ? data.queue : [];
 
-  // Occupancy chart
-  const last8=s2.slice(0,8).reverse();
-  if(last8.length){const mx=Math.max(...last8.map(r=>r.occupancy_level),1);
-    $('occ-chart').innerHTML=last8.map(r=>`<div class="bar-row"><div class="bar-lbl">${fmtTime(r.timestamp)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(r.occupancy_level/mx*100)}%;background:${r.occupancy_level>=8?'var(--danger)':r.occupancy_level>=6?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${r.occupancy_level}</div></div>`).join('');}
+    $('kpi-patients').textContent = patients.length;
+    $('kpi-doctors').textContent = doctors.length;
+    $('kpi-appts').textContent = appts.length;
 
-  // Status breakdown
-  const statuses=['CheckedIn','Consulting','Completed','Departed'];
-  const counts=statuses.map(s=>SC.queueEntries.filter(q=>q.status===s).length);
-  const tot=Math.max(SC.queueEntries.length,1);
-  const cols={CheckedIn:'var(--green)',Consulting:'var(--amber)',Completed:'var(--blue)',Departed:'rgba(255,255,255,.3)'};
-  if(SC.queueEntries.length){$('status-chart').innerHTML=statuses.map((s,i)=>`<div class="bar-row"><div class="bar-lbl">${s}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(counts[i]/tot*100)}%;background:${cols[s]}"></div></div><div class="bar-val">${counts[i]}</div></div>`).join('');}
+    // latest occupancy
+    const occ = sensors.find(s => s.sensor_type === 'ActiveQueueOccupancy');
+    $('kpi-occ').textContent = occ ? occ.occupancy_level : '0';
+    if(occ) { $('last-tick').textContent = typeof fmtTime === 'function' ? fmtTime(occ.timestamp) : occ.timestamp; }
 
-  // Sensor table
-  const stbody=$('sr-tbody');
-  if(stbody){stbody.innerHTML=SC.sensorReadings.length?SC.sensorReadings.slice(0,80).map(r=>`<tr><td style="font-family:var(--mono);font-size:.72rem;color:var(--text-dim)">${r.reading_id}</td><td><span class="badge badge-${r.sensor_type==='SmartCheckIn'?'green':'amber'}">${r.sensor_type==='SmartCheckIn'?'S1':'S2'}</span></td><td style="font-size:.78rem">${r.source}</td><td style="font-family:var(--mono);font-size:.78rem">${r.patient_id||'—'}</td><td style="font-family:var(--mono)">${r.occupancy_level}</td><td style="font-size:.72rem;color:var(--text-dim)">${fmtDateTime(r.timestamp)}</td></tr>`).join('')
-    :'<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:16px">No readings yet.</td></tr>';}
+    // appointment status breakdown
+    const statuses = ['Booked','Completed','Cancelled'];
+    const cols = {Booked:'var(--amber)',Completed:'var(--green)',Cancelled:'var(--danger)'};
+    const tot = Math.max(appts.length, 1);
+    const statusCounts = {Booked:0,Completed:0,Cancelled:0};
+    appts.forEach(a => {
+      const key = mapPowerBIStatus(a.status) === 'cancelled' ? 'Cancelled'
+        : mapPowerBIStatus(a.status) === 'completed' ? 'Completed'
+        : 'Booked';
+      statusCounts[key] = (statusCounts[key] || 0) + 1;
+    });
+    const apptCounts = statuses.map(s => statusCounts[s] || 0);
+    $('appt-chart').innerHTML = statuses.map((s,i) =>
+      `<div class="bar-row"><div class="bar-lbl">${s}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(apptCounts[i]/tot*100)}%;background:${cols[s]}"></div></div><div class="bar-val">${apptCounts[i]}</div></div>`
+    ).join('') || '<p style="color:var(--text-dim);font-size:.82rem">No appointments yet.</p>';
 
-  // Prediction log
-  const ptbody=$('pl-tbody');
-  if(ptbody){
-    const nums=SC.consultationDurations;
-    $('admin-formula').textContent=nums.length===0?'Avg = default 15 min (no consultations completed yet)\nFormula: patientsAhead × rollingAvg = estimated wait'
-      :'Avg = ('+nums.join(' + ')+') ÷ '+nums.length+' = '+rollingAvg()+' min\nFormula: patientsAhead × '+rollingAvg()+' = estimated wait';
-    ptbody.innerHTML=SC.predictionLogs.length?SC.predictionLogs.map(p=>{
-      const acc=p.actual!==null?Math.max(0,Math.round(100-Math.abs((p.actual-p.estimated_wait)/Math.max(p.estimated_wait,1)*100))):null;
-      return`<tr><td><b>${p.patient_name}</b></td><td style="font-family:var(--mono)">#${p.queue_position}</td><td>${p.estimated_wait} min</td><td>${p.actual!==null?p.actual+' min':'<span class="badge badge-dim">Pending</span>'}</td><td>${acc!==null?'<span class="badge badge-'+(acc>=80?'green':acc>=60?'amber':'red')+'">'+acc+'%</span>':'—'}</td><td style="font-size:.72rem;color:var(--text-dim)">${fmtTime(p.logged_at)}</td></tr>`;}).join('')
-    :'<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:16px">No predictions logged.</td></tr>';}
+    // occupancy chart
+    const occReadings = sensors.filter(s => s.sensor_type === 'ActiveQueueOccupancy').slice(0,8).reverse();
+    if(occReadings.length){
+      const mx = Math.max(...occReadings.map(r => r.occupancy_level), 1);
+      $('occ-chart').innerHTML = occReadings.map(r =>
+        `<div class="bar-row"><div class="bar-lbl">${typeof fmtTime==='function'?fmtTime(r.timestamp):r.timestamp}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(r.occupancy_level/mx*100)}%;background:${r.occupancy_level>=8?'var(--danger)':r.occupancy_level>=5?'var(--amber)':'var(--green)'}"></div></div><div class="bar-val">${r.occupancy_level}</div></div>`
+      ).join('');
+    } else {
+      $('occ-chart').innerHTML = '<p style="color:var(--text-dim);font-size:.82rem">No sensor readings.</p>';
+    }
 
-  // Patients
-  const pb=$('pt-tbody');
-  if(pb){$('pt-count').textContent='('+SC.patients.length+')';pb.innerHTML=SC.patients.map(p=>`<tr><td><code>${p.patient_id}</code></td><td><b>${p.full_name}</b></td><td style="font-family:var(--mono);font-size:.78rem">${p.id_number}</td><td>${p.contact||'—'}</td><td style="font-size:.78rem">${p.email||'—'}</td><td style="font-size:.72rem;color:var(--text-dim)">${fmtDate(p.created_at)}</td></tr>`).join('');}
+    // dept chart
+    const depts = {};
+    doctors.forEach(d => { depts[d.department] = (depts[d.department]||0)+1; });
+    const deptMx = Math.max(...Object.values(depts), 1);
+    $('dept-chart').innerHTML = Object.entries(depts).map(([dept,cnt]) =>
+      `<div class="bar-row"><div class="bar-lbl">${dept}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/deptMx*100)}%;background:var(--green)"></div></div><div class="bar-val">${cnt}</div></div>`
+    ).join('') || '<p style="color:var(--text-dim);font-size:.82rem">No doctors yet.</p>';
 
-  // Doctor contacts
-  const ac=$('admin-contacts');
-  if(ac){ac.innerHTML=DOCTORS.map(d=>`<div class="doc-contact-row"><div style="font-size:1.3rem">👨‍⚕️</div><div><div style="font-weight:700">${d.name}</div><div style="font-size:.75rem;color:var(--text-dim)">${d.specialty}</div></div><div class="dc-num">📞 ${d.contact}</div></div>`).join('');}
+    // sensor stats
+    $('s-total').textContent = sensors.length;
+    const peak = sensors.length ? Math.max(...sensors.map(s => s.occupancy_level)) : 0;
+    $('s-peak').textContent = peak;
+  } catch(e) {
+    console.error('Overview load error:', e);
+  }
 }
 
-refreshAdmin();setInterval(refreshAdmin,5000);
-document.addEventListener('sensor2tick',refreshAdmin);
+// ── USERS ─────────────────────────────────────
+async function loadUsers(){
+  try {
+    const res = await api.getUsers();
+    const users = res.data || [];
+    // Exclude patients from the Staff listing
+    const staff = users.filter(u => u.role !== 'patient');
+    $('users-count').textContent = '(' + staff.length + ')';
+    const roleClass = {admin:'role-admin',doctor:'role-doctor',receptionist:'role-receptionist',nurse:'role-nurse'};
+    $('users-tbody').innerHTML = staff.length ? staff.map(u =>
+      `<tr>
+        <td><b>${u.full_name}</b></td>
+        <td style="font-size:.78rem">${u.email}</td>
+        <td><span class="role-badge ${roleClass[u.role]||'badge-dim'}">${u.role}</span></td>
+        <td><span class="badge ${u.is_active?'badge-green':'badge-dim'}">${u.is_active?'Active':'Inactive'}</span></td>
+        <td style="font-size:.75rem;color:var(--text-dim)">${fmtDate(u.created_at)}</td>
+        <td style="text-align:right">
+          <button class="btn btn-sm" onclick="editUser('${u.user_id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="deleteUser('${u.user_id}')">Delete</button>
+        </td>
+      </tr>`
+    ).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No staff found.</td></tr>';
+  } catch(e) {
+    $('users-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:20px">Failed to load users.</td></tr>';
+  }
+}
+
+// ── USER (staff) CRUD helpers ─────────────────
+function openUserForm(user=null){
+  if(user){
+    $('um-title').textContent = 'Edit Staff';
+    $('um-full_name').value = user.full_name || '';
+    $('um-email').value = user.email || '';
+    $('um-role').value = user.role || 'receptionist';
+    $('um-password').value = '';
+    $('um-active').checked = !!user.is_active;
+    $('um-save').dataset.id = user.user_id;
+  } else {
+    $('um-title').textContent = 'New Staff';
+    ['um-full_name','um-email','um-password'].forEach(id => $(id).value='');
+    $('um-role').value = 'receptionist';
+    $('um-active').checked = true;
+    delete $('um-save').dataset.id;
+  }
+  $('user-modal').classList.remove('hidden');
+}
+
+function closeUserForm(){ $('user-modal').classList.add('hidden'); }
+
+async function saveUser(){
+  const id = $('um-save').dataset.id;
+  const payload = {
+    full_name: $('um-full_name').value.trim(),
+    email: $('um-email').value.trim(),
+    role: $('um-role').value,
+    password: $('um-password').value || null,
+    is_active: !!$('um-active').checked,
+  };
+  // Prevent creating a staff user with the 'patient' role from this form
+  if(payload.role === 'patient'){
+    return alert('Cannot create staff with role "patient". Use the Patients section to register patients.');
+  }
+  try {
+    if(id){ await api.updateUser(id, payload); } else { await api.createUser(payload); }
+    closeUserForm(); loadUsers();
+  } catch(e){ alert('Save failed: '+(e.message||e)); }
+}
+
+async function editUser(id){
+  try {
+    const res = await api.getUsers();
+    const user = (res.data||[]).find(u=>u.user_id===id);
+    if(!user) return alert('User not found');
+    openUserForm(user);
+  } catch(e){ alert('Failed to fetch user: '+(e.message||e)); }
+}
+
+async function deleteUser(id){
+  if(!confirm('Delete this user? This cannot be undone.')) return;
+  try { await api.deleteUser(id); loadUsers(); } catch(e){ alert('Delete failed: '+(e.message||e)); }
+}
+
+// ── DOCTORS ───────────────────────────────────
+async function loadDoctors(){
+  try {
+    const res = await api.getDoctors();
+    const doctors = res.data || [];
+    $('doctors-count').textContent = '(' + doctors.length + ')';
+    $('doctors-tbody').innerHTML = doctors.length ? doctors.map(d =>
+      `<tr>
+        <td><b>${d.name}</b></td>
+        <td><span class="badge badge-blue">${d.department}</span></td>
+        <td style="font-size:.82rem">${d.specialisation||'—'}</td>
+        <td style="font-family:var(--mono);font-size:.78rem">${d.contact}</td>
+        <td style="font-size:.78rem">${d.email||'—'}</td>
+        <td style="text-align:right">
+          <button class="btn btn-sm" onclick="editDoctor('${d.doctor_id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="deleteDoctor('${d.doctor_id}')">Delete</button>
+        </td>
+      </tr>`
+    ).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No doctors found.</td></tr>';
+  } catch(e) {
+    $('doctors-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:20px">Failed to load doctors.</td></tr>';
+  }
+}
+
+// ── DOCTORS CRUD helpers
+function openDoctorForm(doctor=null){
+  if(doctor){
+    $('dm-title').textContent = 'Edit Doctor';
+    $('dm-name').value = doctor.name || '';
+    $('dm-department').value = doctor.department || '';
+    $('dm-specialisation').value = doctor.specialisation || '';
+    $('dm-contact').value = doctor.contact || '';
+    $('dm-email').value = doctor.email || '';
+    $('dm-save').dataset.id = doctor.doctor_id;
+  } else {
+    $('dm-title').textContent = 'New Doctor';
+    ['dm-name','dm-department','dm-specialisation','dm-contact','dm-email'].forEach(id=>$(id).value='');
+    delete $('dm-save').dataset.id;
+  }
+  $('doctor-modal').classList.remove('hidden');
+}
+
+function closeDoctorForm(){ $('doctor-modal').classList.add('hidden'); }
+
+async function saveDoctor(){
+  const id = $('dm-save').dataset.id;
+  const payload = {
+    name: $('dm-name').value.trim(),
+    department: $('dm-department').value.trim(),
+    specialisation: $('dm-specialisation').value.trim() || null,
+    contact: $('dm-contact').value.trim() || null,
+    email: $('dm-email').value.trim() || null,
+  };
+  try{
+    if(id) await api.updateDoctor(id, payload);
+    else await api.createDoctor(payload);
+    closeDoctorForm();
+    await loadDoctors();
+    alert('Doctor saved successfully.');
+  }catch(e){ alert('Save failed: '+(e.message||e)); }
+}
+
+async function editDoctor(id){
+  try{
+    const res = await api.getDoctors();
+    const doctor = (res.data||[]).find(d=>d.doctor_id===id);
+    if(!doctor) return alert('Doctor not found');
+    openDoctorForm(doctor);
+  }catch(e){ alert('Fetch failed: '+(e.message||e)); }
+}
+
+async function deleteDoctor(id){
+  if(!confirm('Delete this doctor?')) return;
+  try{ await api.deleteDoctor(id); loadDoctors(); }catch(e){ alert('Delete failed: '+(e.message||e)); }
+}
+
+// ── PATIENTS ──────────────────────────────────
+async function loadPatients(){
+  try {
+    const res = await api.getPatients();
+    const patients = res.data || [];
+    $('pt-count').textContent = '(' + patients.length + ')';
+    $('pt-tbody').innerHTML = patients.length ? patients.map(p =>
+      `<tr>
+        <td><b>${p.full_name}</b></td>
+        <td style="font-family:var(--mono);font-size:.78rem">${p.id_number}</td>
+        <td style="font-size:.78rem">${fmtDate(p.dob)}</td>
+        <td>${p.contact||'—'}</td>
+        <td style="font-size:.78rem">${p.email || '<span style="color:var(--text-dim)">—</span>'}</td>
+        <td style="font-size:.75rem;color:var(--text-dim)">${fmtDate(p.created_at)}</td>
+        <td style="text-align:right">
+          <button class="btn btn-sm" onclick="editPatient('${p.patient_id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="deletePatient('${p.patient_id}')">Delete</button>
+        </td>
+      </tr>`
+    ).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">No patients registered.</td></tr>';
+  } catch(e) {
+    $('pt-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:20px">Failed to load patients.</td></tr>';
+  }
+}
+
+// ── Patient CRUD helpers ─────────────────────
+function openPatientForm(patient=null){
+  if(patient){
+    $('pm-title').textContent = 'Edit Patient';
+    $('pm-full_name').value = patient.full_name || '';
+    $('pm-id_number').value = patient.id_number || '';
+    $('pm-dob').value = patient.dob ? patient.dob.split('T')[0] : '';
+    $('pm-contact').value = patient.contact || '';
+    $('pm-email').value = patient.email || '';
+    $('pm-save').dataset.id = patient.patient_id;
+  } else {
+    $('pm-title').textContent = 'New Patient';
+    ['pm-full_name','pm-id_number','pm-dob','pm-contact','pm-email'].forEach(id => $(id).value='');
+    delete $('pm-save').dataset.id;
+  }
+  $('patient-modal').classList.remove('hidden');
+}
+
+function closePatientForm(){
+  $('patient-modal').classList.add('hidden');
+}
+
+async function savePatient(){
+  const id = $('pm-save').dataset.id;
+  const payload = {
+    full_name: $('pm-full_name').value.trim(),
+    id_number: $('pm-id_number').value.trim(),
+    dob: $('pm-dob').value || null,
+    contact: $('pm-contact').value.trim() || null,
+    email: $('pm-email').value.trim() || null,
+  };
+  try {
+    if(id){
+      await api.updatePatient(id, payload);
+    } else {
+      await api.createPatient(payload);
+    }
+    closePatientForm();
+    loadPatients();
+  } catch(e){
+    alert('Save failed: ' + (e.message||e));
+  }
+}
+
+async function editPatient(id){
+  try {
+    const res = await api.getPatients();
+    const patient = (res.data||[]).find(p=>p.patient_id===id);
+    if(!patient) return alert('Patient not found');
+    openPatientForm(patient);
+  } catch(e){ alert('Failed to fetch patient: '+(e.message||e)); }
+}
+
+async function deletePatient(id){
+  if(!confirm('Delete this patient? This cannot be undone.')) return;
+  try {
+    await api.deletePatient(id);
+    loadPatients();
+  } catch(e){ alert('Delete failed: '+(e.message||e)); }
+}
+
+// ── APPOINTMENTS ──────────────────────────────
+async function loadAppointments(){
+  try {
+    const res = await api.getAppointments();
+    const appts = res.data || [];
+    $('ap-count').textContent = '(' + appts.length + ')';
+    const statusBadge = {Booked:'badge-amber',CheckedIn:'badge-blue',Consulting:'badge-amber',Completed:'badge-green',Cancelled:'badge-red',NoShow:'badge-dim'};
+    $('ap-tbody').innerHTML = appts.length ? appts.map(a => {
+      const canCancel = a.status && !['Completed','Cancelled','NoShow'].includes(a.status);
+      return `<tr>
+        <td><b>${a.patients?.full_name||'—'}</b></td>
+        <td>${a.doctors?.name||'—'}</td>
+        <td style="font-size:.78rem">${a.doctors?.department||'—'}</td>
+        <td style="font-size:.78rem">${fmtDateTime(a.datetime)}</td>
+        <td style="font-size:.78rem;max-width:180px">${a.reason||'—'}</td>
+        <td><span class="badge ${statusBadge[a.status]||'badge-dim'}">${a.status||'Unknown'}</span></td>
+        <td style="text-align:right">
+          <button class="btn btn-sm" onclick="editAppointment('${a.appointment_id}')">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="deleteAppointment('${a.appointment_id}')">Delete</button>
+          ${a.status !== 'Completed' ? `<button class="btn btn-sm" onclick="changeApptStatus('${a.appointment_id}','Completed')">Mark Completed</button>` : ''}
+          ${canCancel ? `<button class="btn btn-outline btn-sm" onclick="changeApptStatus('${a.appointment_id}','Cancelled')">Cancel</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">No appointments.</td></tr>';
+  } catch(e) {
+    $('ap-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:20px">Failed to load appointments.</td></tr>';
+  }
+}
+
+// ── APPOINTMENT CRUD helpers
+function openAppointmentForm(appt=null){
+  // populate patient & doctor selects
+  Promise.all([api.getPatients(), api.getDoctors()]).then(([pRes,dRes])=>{
+    const patients = pRes.data||[]; const doctors = dRes.data||[];
+    const psel = $('am-patient'); const dsel = $('am-doctor');
+    psel.innerHTML = patients.map(p=>`<option value="${p.patient_id}">${p.full_name}</option>`).join('');
+    dsel.innerHTML = doctors.map(d=>`<option value="${d.doctor_id}">${d.name} (${d.department})</option>`).join('');
+    const datetimeInput = $('am-datetime');
+    const minDate = new Date(); minDate.setHours(0,0,0,0); minDate.setDate(minDate.getDate()+1);
+    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() + 2);
+    datetimeInput.min = minDate.toISOString().slice(0,10) + 'T08:00';
+    datetimeInput.max = maxDate.toISOString().slice(0,10) + 'T17:00';
+    $('am-error').classList.add('hidden');
+
+    if(appt){
+      $('am-title').textContent = 'Edit Appointment';
+      $('am-patient').value = appt.patient_id;
+      $('am-doctor').value = appt.doctor_id;
+      $('am-datetime').value = appt.datetime ? appt.datetime.replace('Z','') : '';
+      $('am-reason').value = appt.reason || '';
+      $('am-save').dataset.id = appt.appointment_id;
+    } else {
+      $('am-title').textContent = 'New Appointment';
+      ['am-patient','am-doctor','am-datetime','am-reason'].forEach(id=>$(id).value='');
+      delete $('am-save').dataset.id;
+    }
+    $('appt-modal').classList.remove('hidden');
+  }).catch(e=>alert('Failed to load patients or doctors: '+(e.message||e)));
+}
+
+function closeAppointmentForm(){ $('appt-modal').classList.add('hidden'); }
+
+function validateAdminAppointment(payload){
+  const errorEl = $('am-error');
+  errorEl.classList.add('hidden');
+  if(!payload.patient_id || !payload.doctor_id || !payload.datetime){
+    errorEl.textContent = 'Patient, doctor, and appointment datetime are required.';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  const match = payload.datetime.trim().match(/^([0-9]{4}-[0-9]{2}-[0-9]{2})T([0-9]{2}):([0-9]{2})(?::[0-9]{2})?$/);
+  if(!match){
+    errorEl.textContent = 'Please enter a valid appointment date and time.';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  const [_, datePart, hourStr, minuteStr] = match;
+  const selectedDate = new Date(datePart);
+  selectedDate.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  if(selectedDate < tomorrow){
+    errorEl.textContent = 'Appointment must be scheduled from tomorrow onwards.';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  const hours = Number(hourStr);
+  const mins = Number(minuteStr);
+  if(hours < 8 || hours > 17 || (hours === 17 && mins > 0)){
+    errorEl.textContent = 'Time must be between 08:00 and 17:00.';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  return true;
+}
+
+async function saveAppointment(){
+  const id = $('am-save').dataset.id;
+  const payload = {
+    patient_id: $('am-patient').value,
+    doctor_id: $('am-doctor').value,
+    datetime: $('am-datetime').value,
+    reason: $('am-reason').value.trim() || null,
+  };
+  if(!validateAdminAppointment(payload)) return;
+  try{
+    if(id) await api.updateAppointment(id, payload);
+    else await api.createAppointment(payload);
+    closeAppointmentForm(); loadAppointments();
+  }catch(e){ alert('Save failed: '+(e.message||e)); }
+}
+
+async function editAppointment(id){
+  try{ const res = await api.getAppointment(id); openAppointmentForm(res.data); }catch(e){ alert('Fetch failed: '+(e.message||e)); }
+}
+
+async function deleteAppointment(id){ if(!confirm('Delete this appointment?')) return; try{ await api.deleteAppointment(id); loadAppointments(); }catch(e){ alert('Delete failed: '+(e.message||e)); } }
+
+async function changeApptStatus(id, status){
+  try{
+    await api.updateApptStatus(id, status);
+    loadAppointments();
+    if(document.getElementById('sec-powerbi') && !document.getElementById('sec-powerbi').classList.contains('hidden')) {
+      await updatePowerBI();
+    }
+  }catch(e){
+    alert('Status update failed: '+(e.message||e));
+  }
+}
+
+// ── QUEUE ─────────────────────────────────────
+async function loadQueue(){
+  try {
+    const res = await api.getQueue();
+    const queue = res.data || [];
+    $('q-count').textContent = '(' + queue.length + ')';
+    const statusBadge = {CheckedIn:'badge-green',Consulting:'badge-amber',Completed:'badge-blue',Departed:'badge-dim'};
+    $('q-tbody').innerHTML = queue.length ? queue.map(q =>
+      `<tr><td style="font-family:var(--mono);font-weight:700;color:var(--green)">#${q.queue_position}</td><td><b>${q.appointments?.patients?.full_name||'—'}</b></td><td style="font-size:.78rem;color:var(--text-dim)">${fmtTime(q.checkin_time)}</td><td><span class="badge ${statusBadge[q.status]||'badge-dim'}">${q.status}</span></td></tr>`
+    ).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">Queue is empty.</td></tr>';
+  } catch(e) {
+    $('q-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger);padding:20px">Failed to load queue.</td></tr>';
+  }
+}
+
+// ── SENSORS ───────────────────────────────────
+async function loadSensors(){
+  try {
+    const res = await api.getSensors(100);
+    const sensors = res.data || [];
+    $('s-total').textContent = sensors.length;
+    $('s-peak').textContent = sensors.length ? Math.max(...sensors.map(s => s.occupancy_level)) : 0;
+    $('sr-tbody').innerHTML = sensors.length ? sensors.map(s =>
+      `<tr><td><span class="badge ${s.sensor_type==='SmartCheckIn'?'badge-green':'badge-amber'}">${s.sensor_type==='SmartCheckIn'?'S1 QR':'S2 Occ'}</span></td><td style="font-size:.78rem">${s.source}</td><td style="font-family:var(--mono)">${s.occupancy_level}</td><td style="font-family:var(--mono);font-size:.75rem">${s.patient_id||'—'}</td><td style="font-size:.72rem;color:var(--text-dim)">${fmtDateTime(s.timestamp)}</td></tr>`
+    ).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No sensor readings.</td></tr>';
+  } catch(e) {
+    $('sr-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:20px">Failed to load sensors.</td></tr>';
+  }
+}
+
+// sensor2 live tick
+document.addEventListener('sensor2tick', e => {
+  $('kpi-occ').textContent = e.detail.count;
+  $('last-tick').textContent = fmtTime(e.detail.last_reading);
+});
+
+loadOverview();
+setInterval(loadOverview, 15000);
+// ── Power BI helpers
+async function exportPowerBI(){
+  try{
+    const _tok2 = sessionStorage.getItem('sc_token');
+    const res = await fetch('/api/powerbi/data', { headers: { 'Authorization': 'Bearer ' + _tok2 } });
+    const json = await res.json();
+    if(!res.ok) throw new Error(json.error||'Export failed');
+    const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'smartclinic_powerbi_export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }catch(e){ alert('Export failed: '+(e.message||e)); }
+}
+
+async function exportPowerBICSV(){
+  try{
+    const _tok3 = sessionStorage.getItem('sc_token');
+    const res = await fetch('/api/powerbi/data', { headers: { 'Authorization': 'Bearer ' + _tok3 } });
+    const json = await res.json();
+    if(!res.ok) throw new Error(json.error||'Export failed');
+    const d = json.data;
+    const toCSV = (arr) => {
+      if(!arr || !arr.length) return '';
+      const keys = Object.keys(arr[0]);
+      const rows = [keys.join(',')].concat(arr.map(r => keys.map(k => '"'+String(r[k]===null||r[k]===undefined?'':r[k]).replace(/"/g,'""')+'"').join(',')));
+      return rows.join('\n');
+    };
+    const files = [{name:'patients.csv', content:toCSV(d.patients)},{name:'doctors.csv',content:toCSV(d.doctors)},{name:'appointments.csv',content:toCSV(d.appointments)},{name:'sensors.csv',content:toCSV(d.sensors)},{name:'queue.csv',content:toCSV(d.queue)},{name:'users.csv',content:toCSV(d.users)}];
+    files.forEach(f=>{ const blob = new Blob([f.content],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+  }catch(e){ alert('CSV export failed: '+(e.message||e)); }
+}
+
+function loadPowerBIEmbed(){
+  const url = $('pb-embed-url').value.trim();
+  const container = $('pb-embed');
+  container.innerHTML = '';
+  if(!url) { container.innerHTML = '<div style="color:var(--text-dim)">Paste an embed URL to load the report.</div>'; return; }
+  const iframe = document.createElement('iframe'); iframe.src = url; iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='0'; container.appendChild(iframe);
+}
+
+function copyCSVUrl(id){
+  const el = $(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.value).then(()=>{ alert('Copied URL to clipboard'); }).catch(()=>{ prompt('Copy this URL', el.value); });
+}
+
+function fillPowerBIUrls(){
+  const origin = window.location.origin;
+  $('pb-json-url').value = origin + '/api/powerbi/live';
+  $('pb-csv-patients').value = origin + '/api/powerbi/csv/patients';
+  $('pb-csv-doctors').value = origin + '/api/powerbi/csv/doctors';
+  $('pb-csv-appointments').value = origin + '/api/powerbi/csv/appointments';
+}
+
+// fill URLs on load
+setTimeout(fillPowerBIUrls, 250);
+
+const pbCharts = {};
+let pbRefreshTimer = null;
+let pbClockTimer = null;
+
+function mapPowerBIStatus(status){
+  if(!status) return 'pending';
+  const s = String(status).trim().toLowerCase().replace(/[_\s]+/g, '-');
+  if(['booked','scheduled','checked-in','checkedin','waiting'].includes(s)) return 'scheduled';
+  if(['completed'].includes(s)) return 'completed';
+  if(['cancelled','no-show','noshow','no show','no_show'].includes(s)) return 'cancelled';
+  if(['pending','consulting','in-progress','in progress'].includes(s)) return 'pending';
+  return 'pending';
+}
+
+function formatPowerBIDate(iso){
+  if(!iso) return {date:'—', time:'—'};
+  const d = new Date(iso);
+  if(Number.isNaN(d.getTime())) return {date:'—', time:'—'};
+  return { date: d.toLocaleDateString('en-ZA'), time: d.toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'}) };
+}
+
+function updatePbClock(){
+  const clock = document.getElementById('pb-clock');
+  if(!clock) return;
+  const now = new Date();
+  clock.textContent = now.toLocaleString('en-ZA', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+
+function showPowerBIOffline(message){
+  let overlay = document.getElementById('pb-offline');
+  const dash = document.getElementById('pb-dash');
+  if(dash && getComputedStyle(dash).position === 'static') dash.style.position = 'relative';
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'pb-offline';
+    overlay.style.cssText = 'position:absolute;inset:0;background:rgba(10,10,20,0.88);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem;border-radius:16px;z-index:50;padding:16px;text-align:center;';
+    if(dash) dash.appendChild(overlay);
+  }
+  overlay.textContent = message || 'Server offline — data unavailable';
+}
+
+function hidePowerBIOffline(){
+  const overlay = document.getElementById('pb-offline');
+  if(overlay) overlay.remove();
+}
+
+async function loadPowerBI(){
+  try {
+    await updatePowerBI();
+    if(pbRefreshTimer) clearInterval(pbRefreshTimer);
+    pbRefreshTimer = setInterval(updatePowerBI, 60000);
+    if(pbClockTimer) clearInterval(pbClockTimer);
+    updatePbClock();
+    pbClockTimer = setInterval(updatePbClock, 1000);
+  } catch(e) {
+    console.error('loadPowerBI failed', e);
+    showPowerBIOffline('Unable to load dashboard data');
+  }
+}
+
+async function updatePowerBI(){
+  const _tok4 = sessionStorage.getItem('sc_token');
+  const response = await fetch('/api/powerbi/live', { headers: { 'Authorization': 'Bearer ' + _tok4 } });
+  if(!response.ok) throw new Error('Failed to fetch live Power BI data');
+  const json = await response.json();
+  if(!json.data) throw new Error('Invalid Power BI payload');
+
+  hidePowerBIOffline();
+
+  const data = json.data;
+  const patients = Array.isArray(data.patients) ? data.patients : [];
+  const doctors = Array.isArray(data.doctors) ? data.doctors : [];
+  const appointments = Array.isArray(data.appointments) ? data.appointments : [];
+  const queue = Array.isArray(data.queue) ? data.queue : [];
+  const users = Array.isArray(data.users) ? data.users : [];
+
+  $('kp-patients').textContent = patients.length;
+  $('kp-appointments').textContent = appointments.length;
+  $('kp-staff').textContent = users.length;
+  $('kp-queue').textContent = queue.length;
+
+  const statusCounts = {scheduled:0,pending:0,completed:0,cancelled:0};
+  appointments.forEach(a => { statusCounts[mapPowerBIStatus(a.status)]++; });
+
+  const doctorMap = {};
+  appointments.forEach(a => {
+    const name = (a.doctors && a.doctors.name) || 'Unassigned';
+    doctorMap[name] = (doctorMap[name] || 0) + 1;
+  });
+  const topDoctors = Object.entries(doctorMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const doctorLabels = topDoctors.map(([name]) => name);
+  const doctorValues = topDoctors.map(([,count]) => count);
+
+  const departmentMap = {};
+  appointments.forEach(a => {
+    const dept = (a.doctors && a.doctors.department) || 'Unknown';
+    departmentMap[dept] = (departmentMap[dept] || 0) + 1;
+  });
+  const departmentEntries = Object.entries(departmentMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const departmentLabels = departmentEntries.map(([dept]) => dept);
+  const departmentValues = departmentEntries.map(([,count]) => count);
+
+  const monthKeys = [];
+  const monthCounts = {};
+  const currentDate = new Date();
+  for(let i=9; i>=0; i--){
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth()-i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    monthKeys.push(d.toLocaleString('en-ZA',{month:'short', year:'numeric'}));
+    monthCounts[key] = 0;
+  }
+  patients.forEach(p => {
+    if(!p.created_at) return;
+    const key = p.created_at.slice(0,7);
+    if(key in monthCounts) monthCounts[key]++;
+  });
+  const monthValues = Object.keys(monthCounts).map(k => monthCounts[k]);
+
+  const roleMap = {};
+  users.forEach(u => {
+    const role = u.role || 'Unknown';
+    roleMap[role] = (roleMap[role] || 0) + 1;
+  });
+  const roleEntries = Object.entries(roleMap).sort((a,b) => b[1]-a[1]);
+  const roleLabels = roleEntries.map(([role]) => role);
+  const roleValues = roleEntries.map(([,count]) => count);
+
+  const recentAppointments = [...appointments].sort((a,b) => new Date(b.datetime) - new Date(a.datetime)).slice(0,8);
+  const recentBody = document.querySelector('#recent-appts tbody');
+  if(recentBody){
+    recentBody.innerHTML = recentAppointments.length ? recentAppointments.map(a => {
+      const patient = (a.patients && a.patients.full_name) || '—';
+      const doctor = (a.doctors && a.doctors.name) || '—';
+      const dt = formatPowerBIDate(a.datetime);
+      return `<tr><td>${patient}</td><td>${doctor}</td><td>${dt.date}</td><td><span class="status-${mapPowerBIStatus(a.status)}">${a.status||'Unknown'}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:20px">No recent appointments.</td></tr>';
+  }
+
+  const registryBody = document.querySelector('#user-registry tbody');
+  if(registryBody){
+    const usersSorted = [...users].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,10);
+    registryBody.innerHTML = usersSorted.length ? usersSorted.map(u => `<tr><td>${u.full_name||'—'}</td><td>${u.email||'—'}</td><td>${u.role||'—'}</td></tr>`).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--text-dim);padding:20px">No users found.</td></tr>';
+  }
+
+  createOrUpdateChart('chart-status', {
+    type: 'bar',
+    data: {
+      labels: ['Scheduled','Pending','Completed','Cancelled'],
+      datasets: [{
+        label: 'Appointments',
+        data: [statusCounts.scheduled,statusCounts.pending,statusCounts.completed,statusCounts.cancelled],
+        backgroundColor: ['#00b0ff','#ffd15c','#3cd07d','#ff6b6b'],
+        borderRadius: 12,
+        borderSkipped: false,
+        maxBarThickness: 34,
+        barPercentage: 0.68,
+        categoryPercentage: 0.75
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#0e263d', bodyColor: '#eef6ff', titleColor: '#96c7ff', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#d7eafb' } },
+        y: { grid: { display: false }, ticks: { color: '#d7eafb' } }
+      }
+    }
+  });
+
+  createOrUpdateChart('chart-doctor', {
+    type: 'bar',
+    data: {
+      labels: doctorLabels,
+      datasets: [{
+        label: 'Appointments',
+        data: doctorValues,
+        backgroundColor: '#a374ff',
+        borderRadius: 12,
+        borderSkipped: false,
+        maxBarThickness: 32,
+        barPercentage: 0.7,
+        categoryPercentage: 0.78
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#0e263d', bodyColor: '#eef6ff', titleColor: '#96c7ff', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#d7eafb' } },
+        y: { grid: { display: false }, ticks: { color: '#d7eafb' } }
+      }
+    }
+  });
+
+  createOrUpdateChart('chart-department', {
+    type: 'bar',
+    data: {
+      labels: departmentLabels,
+      datasets: [{
+        label: 'Visits',
+        data: departmentValues,
+        backgroundColor: '#52e5ff',
+        borderRadius: 12,
+        borderSkipped: false,
+        maxBarThickness: 32,
+        barPercentage: 0.7,
+        categoryPercentage: 0.78
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#0e263d', bodyColor: '#eef6ff', titleColor: '#96c7ff', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1 }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#d7eafb' } },
+        y: { grid: { display: false }, ticks: { color: '#d7eafb' } }
+      }
+    }
+  });
+
+  createOrUpdateChart('chart-registrations', {
+    type: 'line',
+    data: {
+      labels: monthKeys,
+      datasets: [{
+        label: 'New Patients',
+        data: monthValues,
+        borderColor: '#4fd1ff',
+        backgroundColor: 'rgba(79,209,255,0.22)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#4fd1ff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#d7eafb' } },
+        y: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#d7eafb' } }
+      }
+    }
+  });
+
+  createOrUpdateChart('chart-roles', {
+    type: 'doughnut',
+    data: {
+      labels: roleLabels,
+      datasets: [{
+        label: 'User Roles',
+        data: roleValues,
+        backgroundColor: ['#7bb5ff','#4fd1ff','#ffd15c','#ff8d8d','#b59dff'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { color: '#d7eafb' } } }
+    }
+  });
+}
+
+function createOrUpdateChart(canvasId, config){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  if(pbCharts[canvasId]){
+    pbCharts[canvasId].data = config.data;
+    pbCharts[canvasId].options = config.options;
+    pbCharts[canvasId].update();
+  } else {
+    pbCharts[canvasId] = new Chart(canvas, config);
+  }
+}
+
+loadPowerBI();
 </script>
 </body>
 </html>

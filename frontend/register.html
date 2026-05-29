@@ -49,16 +49,17 @@ body { display:flex; min-height:100vh; background:var(--navy); }
 
 /* QR card preview */
 .qr-card {
-  border:2px solid #6DD9C4; border-radius:16px; padding:22px; background:#fff;
-  text-align:center; max-width:290px; margin:0 auto; box-shadow:0 4px 20px rgba(0,200,150,.12);
+  border-radius:18px; padding:20px; background:linear-gradient(180deg,#ffffff,#f3fdfa); text-align:center;
+  max-width:320px; margin:0 auto; box-shadow:0 8px 28px rgba(4,120,87,.08); border:1px solid rgba(4,120,87,.06);
 }
-.qr-card .cn { font-family:var(--mono); font-size:.68rem; font-weight:700; color:#009e78; letter-spacing:.12em; }
-.qr-card .cs { font-size:.62rem; color:#7A95A8; margin-bottom:14px; }
-.qr-card #qr-render { display:flex; justify-content:center; margin-bottom:12px; }
-.qr-card #qr-render canvas { border:3px solid #E0F8F5; border-radius:8px; }
-.qr-card .pn { font-size:1rem; font-weight:700; color:#0D1B2A; }
-.qr-card .pp { font-family:var(--mono); font-size:.82rem; color:#009e78; margin-top:3px; }
-.qr-card .pi { font-size:.72rem; color:#7A95A8; margin-top:2px; }
+.qr-card .card-top { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:10px; }
+.qr-card .card-top img{height:34px;border-radius:6px;padding:4px;background:rgba(0,0,0,.03)}
+.qr-card .cn { font-family:var(--mono); font-size:1rem; font-weight:800; color:#065F46; }
+.qr-card .cs { font-size:.72rem; color:#065F46; margin-bottom:12px; letter-spacing:.08em; }
+.qr-card #qr-render { display:flex; justify-content:center; padding:12px; background:#fff; border-radius:16px; margin-bottom:12px; }
+.qr-card #qr-render canvas { border-radius:12px; }
+.qr-card .pn { font-size:1.02rem; font-weight:800; color:#044E40; margin-top:6px; width:100%; overflow-wrap:anywhere; word-break:break-word; }
+.qr-card .pp, .qr-card .pi { font-family:var(--mono); font-size:.86rem; color:#047857; margin-top:4px; width:100%; overflow-wrap:anywhere; word-break:break-word; }
 
 .sign-btn { width:100%; padding:12px; background:var(--green); color:var(--navy); font-family:var(--font); font-size:.95rem; font-weight:700; border:none; border-radius:10px; cursor:pointer; transition:all .2s; }
 .sign-btn:hover { background:var(--green-dark); }
@@ -102,8 +103,8 @@ body { display:flex; min-height:100vh; background:var(--navy); }
       <div class="lf">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="field"><label>Full Name *</label><input id="r-name" type="text" placeholder="e.g. Zanele Dlamini"></div>
-          <div class="field"><label>SA ID Number *</label><input id="r-id" type="text" placeholder="13-digit ID" maxlength="13"><div class="hint">Must be exactly 13 digits</div></div>
-          <div class="field"><label>Date of Birth</label><input id="r-dob" type="date"></div>
+          <div class="field"><label>SA ID Number *</label><input id="r-id" type="text" placeholder="13-digit ID" maxlength="13" oninput="onIdInput()"><div class="hint">Enter your full 13-digit South African ID</div></div>
+          <div class="field"><label>Date of Birth</label><input id="r-dob" type="date" readonly></div>
           <div class="field"><label>Contact Number</label><input id="r-contact" type="tel" placeholder="073 456 7890"></div>
         </div>
         <div class="field"><label>Email (optional)</label><input id="r-email" type="email" placeholder="email@example.com"></div>
@@ -117,18 +118,15 @@ body { display:flex; min-height:100vh; background:var(--navy); }
     <div id="card-result" class="hidden">
       <div style="background:#D1FAE5;border-left:3px solid #10B981;border-radius:10px;padding:12px 16px;color:#065F46;font-size:.875rem;margin-bottom:16px">✅ Registration successful! Download and keep your card safe.</div>
       <div class="qr-card">
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="8" fill="#00C896"/>
-            <rect x="13" y="5" width="6" height="22" rx="3" fill="white"/>
-            <rect x="5" y="13" width="22" height="6" rx="3" fill="white"/>
-          </svg>
+        <div class="card-top">
+          <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic">
           <div class="cn">SMARTCLINIC</div>
         </div>
         <div class="cs">OFFICIAL CLINIC CARD</div>
         <div id="qr-render"></div>
         <div class="pn" id="card-name"></div>
         <div class="pp" id="card-pid"></div>
+        <div class="pi" id="card-dob"></div>
         <div class="pi" id="card-idnum"></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px">
@@ -145,47 +143,151 @@ body { display:flex; min-height:100vh; background:var(--navy); }
 <script>
   let curPatient=null;
 
-  function doRegister() {
-    const name=$('r-name').value.trim(), id=$('r-id').value.trim();
-    const dob=$('r-dob').value, contact=$('r-contact').value.trim(), email=$('r-email').value.trim();
-    if (!name||!id){showRegAlert('warning','⚠ Full name and SA ID number are required.');return;}
-    if (!/^\d{13}$/.test(id)){showRegAlert('error','⚠ SA ID number must be exactly 13 digits.');return;}
-    if (SC.patients.find(p=>p.id_number===id)){showRegAlert('error','⚠ A patient with this ID number already exists.');return;}
-    SC.patientCounter++;
-    const patient={ patient_id:'SC-'+String(SC.patientCounter).padStart(3,'0'), full_name:name, id_number:id, dob, contact, email, created_at:new Date().toISOString() };
-    SC.patients.push(patient); curPatient=patient;
-    showCard(patient);
+  function parseSAIDDate(id) {
+    if (!/^\d{6}/.test(id)) return null;
+    const yy = parseInt(id.slice(0,2),10);
+    const mm = parseInt(id.slice(2,4),10);
+    const dd = parseInt(id.slice(4,6),10);
+    const now = new Date();
+    const cutoff = now.getFullYear() % 100;
+    const year = yy > cutoff ? 1900 + yy : 2000 + yy;
+    const date = new Date(year, mm - 1, dd);
+    if (date.getFullYear() !== year || date.getMonth() !== mm - 1 || date.getDate() !== dd) return null;
+    return date.toISOString().slice(0,10);
+  }
+
+  function luhnCheck(id) {
+    const digits = id.split('').map(d => +d);
+    let sum = 0;
+    for (let i = digits.length - 1; i >= 0; i--) {
+      let digit = digits[i];
+      if ((digits.length - 1 - i) % 2 === 1) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      sum += digit;
+    }
+    return sum % 10 === 0;
+  }
+
+  function isValidSAID(id) {
+    return /^\d{13}$/.test(id) && parseSAIDDate(id) && luhnCheck(id);
+  }
+
+  function onIdInput() {
+    const input = $('r-id');
+    const raw = input.value.replace(/\D/g, '');
+    input.value = raw;
+    if (raw.length >= 6) {
+      const parsed = parseSAIDDate(raw);
+      if (parsed) {
+        $('r-dob').value = parsed;
+        $('reg-alert').classList.add('hidden');
+      }
+    }
+  }
+
+  async function doRegister() {
+    const name = $('r-name').value.trim();
+    const id = $('r-id').value.trim();
+    const contact = $('r-contact').value.trim();
+    const email = $('r-email').value.trim();
+    if (!name || !id) { showRegAlert('warning','⚠ Full name and SA ID number are required.'); return; }
+    if (!/^\d{13}$/.test(id)) { showRegAlert('error','⚠ SA ID number must be exactly 13 digits.'); return; }
+    const dob = parseSAIDDate(id);
+    if (!dob) { showRegAlert('error','⚠ Invalid SA ID date. Please check the first 6 digits.'); return; }
+    if (!luhnCheck(id)) { showRegAlert('error','⚠ Invalid SA ID checksum. Please confirm your ID number.'); return; }
+    $('r-dob').value = dob;
+
+    try {
+      const payload = { full_name: name, id_number: id, dob, contact, email };
+      const res = await api.createPatient(payload);
+      const patient = res.data;
+      setUser({
+        role: 'patient',
+        full_name: patient.full_name,
+        patient_id: patient.patient_id,
+        id_number: patient.id_number,
+        contact: patient.contact,
+        email: patient.email,
+        dob: patient.dob
+      });
+      curPatient = patient;
+      showCard(patient);
+      showRegAlert('success','✅ Registration successful! Your card is ready. Download it now or you will be taken to your patient dashboard shortly.');
+      setTimeout(() => { window.location.href = 'dashboards/patient.html'; }, 4000);
+    } catch (err) {
+      const msg = err.message || '';
+      if (msg.includes('Patient with this ID number already exists')) {
+        showRegAlert('error','⚠ A patient with this ID number already exists.');
+      } else {
+        showRegAlert('error','⚠ Registration failed: ' + msg);
+      }
+    }
   }
 
   function showCard(p) {
+    curPatient = p;
+    const displayNumber = p.patient_no || p.patient_id || 'N/A';
     $('reg-form').classList.add('hidden'); $('reg-alert').classList.add('hidden'); $('card-result').classList.remove('hidden');
-    $('card-name').textContent=p.full_name; $('card-pid').textContent=p.patient_id; $('card-idnum').textContent='ID: '+p.id_number;
-    const d=$('qr-render'); d.innerHTML='';
-    new QRCode(d,{text:p.patient_id,width:140,height:140,colorDark:'#006B60',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+    $('card-name').textContent = p.full_name;
+    $('card-pid').textContent = displayNumber;
+    $('card-dob').textContent = 'DOB: ' + (p.dob || '—');
+    $('card-idnum').textContent = 'ID: ' + p.id_number;
+    const d = $('qr-render'); d.innerHTML = '';
+    new QRCode(d,{text:displayNumber,width:140,height:140,colorDark:'#006B60',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
   }
 
-  function downloadCard() {
-    const p=curPatient; if(!p)return;
-    const canvas=document.querySelector('#qr-render canvas');
-    if(!canvas){alert('QR not ready');return;}
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF({unit:'mm',format:[85,54]});
+  function loadImageDataURL(url){
+    return new Promise((resolve,reject)=>{
+      const img = new Image(); img.crossOrigin = 'Anonymous';
+      img.onload = ()=>{ const c=document.createElement('canvas'); c.width=img.width; c.height=img.height; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0); resolve(c.toDataURL('image/png')); };
+      img.onerror = ()=>reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  }
+
+  async function downloadCard() {
+    const p = curPatient; if (!p) return;
+    let canvas = document.querySelector('#qr-render canvas');
+    if (!canvas) { showCard(p); canvas = document.querySelector('#qr-render canvas'); }
+    if (!canvas) { alert('QR not ready'); return; }
+    const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+    if (!jsPDF) { alert('PDF library failed to load. Please refresh the page and try again.'); return; }
+    const doc = new jsPDF({unit:'mm',format:[85,54]});
     // Card background
     doc.setFillColor(0,107,96); doc.rect(0,0,85,54,'F');
-    // Logo cross
-    doc.setFillColor(0,200,150); doc.roundedRect(5,5,12,12,2,2,'F');
-    doc.setFillColor(255,255,255); doc.rect(9.5,7,3,8,'F'); doc.rect(7,10,8,3,'F');
+    // Try to embed logo image
+    try{
+      const logoUrl = 'https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg';
+      const logoData = await loadImageDataURL(logoUrl);
+      doc.addImage(logoData,'PNG',5,5,12,12);
+    } catch(e){
+      // fallback vector
+      doc.setFillColor(0,200,150); doc.roundedRect(5,5,12,12,2,2,'F');
+      doc.setFillColor(255,255,255); doc.rect(9.5,7,3,8,'F'); doc.rect(7,10,8,3,'F');
+    }
     // Brand name
     doc.setTextColor(255,255,255); doc.setFont('courier','bold'); doc.setFontSize(9); doc.text('SmartClinic',20,10);
     doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(178,223,219); doc.text('OFFICIAL CLINIC CARD',20,15);
     // QR
     doc.addImage(canvas.toDataURL('image/png'),'PNG',5,18,26,26);
     // Patient details
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.text(p.full_name,34,22);
-    doc.setFont('courier','bold'); doc.setFontSize(10); doc.setTextColor(128,203,196); doc.text(p.patient_id,34,30);
-    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(178,223,219); doc.text('ID: '+p.id_number,34,37);
+    const nameLines = doc.splitTextToSize(String(p.full_name || ''), 42);
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+    if (nameLines.length > 1) {
+      doc.text(nameLines,34,22);
+    } else {
+      doc.text(nameLines[0] || '',34,22);
+    }
+    const afterNameY = 22 + (nameLines.length * 6);
+    const displayNumber = p.patient_no || p.patient_id || '';
+    doc.setFont('courier','bold'); doc.setFontSize(10); doc.setTextColor(128,203,196);
+    doc.text(String(displayNumber),34,afterNameY + 6);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(178,223,219);
+    doc.text('ID: '+String(p.id_number || ''),34,afterNameY + 12);
     doc.setFontSize(6); doc.setTextColor(100,170,163); doc.text('Keep this card safe. Present at every visit.',5,50);
-    doc.save('SmartClinic-Card-'+p.patient_id+'.pdf');
+    doc.save('SmartClinic-Card-'+displayNumber+'.pdf');
   }
 
   function regAnother() {
@@ -196,7 +298,9 @@ body { display:flex; min-height:100vh; background:var(--navy); }
 
   function showRegAlert(type,msg) {
     const el=$('reg-alert');
-    const bg={warning:'#FEF3C7',error:'#FEE2E2'}; const bdr={warning:'#F59E0B',error:'#EF4444'}; const col={warning:'#92400E',error:'#B91C1C'};
+    const bg={warning:'#FEF3C7',error:'#FEE2E2',success:'#D1FAE5'};
+    const bdr={warning:'#F59E0B',error:'#EF4444',success:'#10B981'};
+    const col={warning:'#92400E',error:'#B91C1C',success:'#065F46'};
     el.style.background=bg[type]; el.style.borderColor=bdr[type]; el.style.color=col[type]; el.className='alert'; el.textContent=msg; el.classList.remove('hidden');
   }
 </script>

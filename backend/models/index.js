@@ -1,5 +1,5 @@
 // models/index.js — all models using exact Supabase column names
-const db = require('../config/supabase');
+const db = require('../config/supabase.js');
 
 // ─────────────────────────────────────────────
 // USERS
@@ -8,9 +8,9 @@ const Users = {
   findByEmail: async (email) => {
     const { data, error } = await db
       .from('users')
-      .select('*')
-      .eq('email', email)
-      .single();
+      .select('user_id, full_name, email, password, role, is_active, created_at')
+      .eq('email', email.toLowerCase().trim())
+      .maybeSingle();
     if (error && error.code !== 'PGRST116') throw error;
     return data;
   },
@@ -19,8 +19,9 @@ const Users = {
       .from('users')
       .select('user_id, full_name, email, role, is_active, created_at')
       .eq('user_id', user_id)
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('User not found');
     return data;
   },
   getAll: async () => {
@@ -30,6 +31,35 @@ const Users = {
       .order('role');
     if (error) throw error;
     return data;
+  },
+  create: async (data) => {
+    const { data: row, error } = await db
+      .from('users')
+      .insert([data])
+      .select('user_id, full_name, email, role, is_active, created_at')
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) throw new Error('Failed to create user');
+    return row;
+  },
+  update: async (user_id, updates) => {
+    const { data, error } = await db
+      .from('users')
+      .update(updates)
+      .eq('user_id', user_id)
+      .select('user_id, full_name, email, role, is_active, created_at')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error('User not found');
+    return data;
+  },
+  delete: async (user_id) => {
+    const { error } = await db
+      .from('users')
+      .delete()
+      .eq('user_id', user_id);
+    if (error) throw error;
+    return { message: 'User deleted' };
   },
 };
 
@@ -42,9 +72,20 @@ const Patients = {
       .from('patients')
       .insert([data])
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!row) throw new Error('Failed to create patient');
     return row;
+  },
+  getLatestPatientId: async () => {
+    const { data, error } = await db
+      .from('patients')
+      .select('patient_id')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data ? data.patient_id : null;
   },
   getAll: async () => {
     const { data, error } = await db
@@ -59,7 +100,17 @@ const Patients = {
       .from('patients')
       .select('*')
       .eq('patient_id', patient_id)
-      .single();
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error('Patient not found');
+    return data;
+  },
+  getByIdNumber: async (id_number) => {
+    const { data, error } = await db
+      .from('patients')
+      .select('*')
+      .eq('id_number', id_number)
+      .maybeSingle();
     if (error) throw error;
     return data;
   },
@@ -69,8 +120,9 @@ const Patients = {
       .update(updates)
       .eq('patient_id', patient_id)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Patient not found');
     return data;
   },
   delete: async (patient_id) => {
@@ -92,8 +144,9 @@ const Doctors = {
       .from('doctors')
       .insert([data])
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!row) throw new Error('Failed to create doctor');
     return row;
   },
   getAll: async () => {
@@ -109,8 +162,9 @@ const Doctors = {
       .from('doctors')
       .select('*')
       .eq('doctor_id', doctor_id)
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Doctor not found');
     return data;
   },
   update: async (doctor_id, updates) => {
@@ -119,8 +173,9 @@ const Doctors = {
       .update(updates)
       .eq('doctor_id', doctor_id)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Doctor not found');
     return data;
   },
   delete: async (doctor_id) => {
@@ -142,8 +197,9 @@ const Appointments = {
       .from('appointments')
       .insert([data])
       .select(`*, patients(full_name), doctors(name, contact)`)
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!row) throw new Error('Failed to create appointment');
     return row;
   },
   getAll: async () => {
@@ -151,6 +207,30 @@ const Appointments = {
       .from('appointments')
       .select(`*, patients(full_name), doctors(name, contact, department)`)
       .order('datetime');
+    if (error) throw error;
+    return data;
+  },
+  getByDoctorDatetime: async (doctor_id, datetime, excludeAppointmentId = null) => {
+    let query = db
+      .from('appointments')
+      .select('*')
+      .eq('doctor_id', doctor_id)
+      .eq('datetime', datetime)
+      .in('status', ['Booked','CheckedIn','Consulting']);
+    if (excludeAppointmentId) query = query.neq('appointment_id', excludeAppointmentId);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+  getByPatientDatetime: async (patient_id, datetime, excludeAppointmentId = null) => {
+    let query = db
+      .from('appointments')
+      .select('*')
+      .eq('patient_id', patient_id)
+      .eq('datetime', datetime)
+      .in('status', ['Booked','CheckedIn','Consulting']);
+    if (excludeAppointmentId) query = query.neq('appointment_id', excludeAppointmentId);
+    const { data, error } = await query.maybeSingle();
     if (error) throw error;
     return data;
   },
@@ -170,8 +250,20 @@ const Appointments = {
       .from('appointments')
       .select(`*, patients(full_name), doctors(name, contact)`)
       .eq('appointment_id', appointment_id)
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Appointment not found');
+    return data;
+  },
+  update: async (appointment_id, updates) => {
+    const { data, error } = await db
+      .from('appointments')
+      .update(updates)
+      .eq('appointment_id', appointment_id)
+      .select(`*, patients(full_name), doctors(name, contact)`)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error('Appointment not found');
     return data;
   },
   getByPatient: async (patient_id) => {
@@ -189,8 +281,9 @@ const Appointments = {
       .update({ status })
       .eq('appointment_id', appointment_id)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Appointment not found');
     return data;
   },
   delete: async (appointment_id) => {
@@ -212,8 +305,9 @@ const Queue = {
       .from('queue_entries')
       .insert([data])
       .select(`*, appointments(*, patients(full_name), doctors(name))`)
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!row) throw new Error('Failed to check in');
     return row;
   },
   getActive: async () => {
@@ -252,8 +346,9 @@ const Queue = {
       .update(updates)
       .eq('queue_id', queue_id)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Queue entry not found');
     return data;
   },
   getByAppointment: async (appointment_id) => {
@@ -262,7 +357,7 @@ const Queue = {
       .select('*')
       .eq('appointment_id', appointment_id)
       .in('status', ['CheckedIn', 'Consulting'])
-      .single();
+      .maybeSingle();
     if (error && error.code !== 'PGRST116') throw error;
     return data || null;
   },
@@ -277,6 +372,34 @@ const Queue = {
     if (error) throw error;
     return data.map(r => r.duration);
   },
+  endConsultation: async (queue_id) => {
+    const { data: current, error: fetchErr } = await db
+      .from('queue_entries')
+      .select('consult_start, appointment_id, status')
+      .eq('queue_id', queue_id)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!current) throw new Error('Queue entry not found');
+    if (current.status === 'Completed') throw new Error('Consultation already ended');
+    const now = new Date().toISOString();
+    const duration = current.consult_start
+      ? Math.max(1, Math.round((new Date(now) - new Date(current.consult_start)) / 60000))
+      : null;
+    const { data: updated, error: updateErr } = await db
+      .from('queue_entries')
+      .update({ consult_end: now, status: 'Completed', duration })
+      .eq('queue_id', queue_id)
+      .select()
+      .maybeSingle();
+    if (updateErr) throw updateErr;
+    if (!updated) throw new Error('Failed to update queue entry');
+    if (current.appointment_id) {
+      await db.from('appointments')
+        .update({ status: 'Completed' })
+        .eq('appointment_id', current.appointment_id);
+    }
+    return { updated, duration };
+  },
 };
 
 // ─────────────────────────────────────────────
@@ -288,8 +411,9 @@ const Sensors = {
       .from('sensor_readings')
       .insert([{ sensor_type, source, patient_id, occupancy_level }])
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Failed to write sensor reading');
     return data;
   },
   getAll: async (limit = 100) => {
@@ -328,7 +452,7 @@ const Sensors = {
       .eq('sensor_type', 'ActiveQueueOccupancy')
       .order('timestamp', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
     if (error && error.code !== 'PGRST116') throw error;
     return data || { occupancy_level: 0, timestamp: null };
   },
@@ -343,8 +467,9 @@ const Predictions = {
       .from('prediction_logs')
       .insert([{ queue_id, estimated_wait, avg_used }])
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Failed to create prediction');
     return data;
   },
   recordActual: async (queue_id, actual_wait) => {
@@ -355,8 +480,9 @@ const Predictions = {
       .eq('queue_id', queue_id)
       .is('actual_wait', null)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('Prediction log not found or already has actual_wait');
     return data;
   },
   _calcAccuracy: async (queue_id, actual_wait) => {
@@ -364,7 +490,7 @@ const Predictions = {
       .from('prediction_logs')
       .select('estimated_wait')
       .eq('queue_id', queue_id)
-      .single();
+      .maybeSingle();
     if (!data) return null;
     return Math.max(0, Math.round(
       100 - Math.abs((actual_wait - data.estimated_wait) / Math.max(data.estimated_wait, 1) * 100)

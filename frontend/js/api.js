@@ -1,10 +1,10 @@
 // frontend/js/api.js
 // ── SmartClinic — API Integration Layer ──────
-// Calls the real Node.js backend at localhost:3000
+// Calls the Node.js backend relative to the current host
 // Falls back to mock data if backend is unreachable
 // ─────────────────────────────────────────────
 
-const API = 'http://localhost:3000/api';
+const API = '/api';
 
 // ── Fallback shared app state for dashboard demos ─────────────
 window.SC = window.SC || {
@@ -86,9 +86,13 @@ window.DOCTORS = window.DOCTORS || [
 // ── HTTP helper ───────────────────────────────
 async function http(method, path, body = null) {
   try {
+    const token = sessionStorage.getItem('sc_token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = 'Bearer ' + token;
     const opts = {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      cache: 'no-store',
     };
     if (body) opts.body = JSON.stringify(body);
     const res  = await fetch(API + path, opts);
@@ -109,6 +113,12 @@ const api = {
   login: (email, password) =>
     http('POST', '/auth/login', { email, password }),
 
+  // USERS (staff)
+  getUsers:   ()     => http('GET',  '/auth/users'),
+  createUser: (data) => http('POST', '/auth/users', data),
+  updateUser: (id, data) => http('PUT', '/auth/users/'+id, data),
+  deleteUser: (id) => http('DELETE', '/auth/users/'+id),
+
   // PATIENTS
   getPatients:   ()     => http('GET',    '/patients'),
   createPatient: (data) => http('POST',   '/patients', data),
@@ -117,15 +127,21 @@ const api = {
 
   // DOCTORS
   getDoctors: () => http('GET', '/doctors'),
+  createDoctor: (data) => http('POST', '/doctors', data),
+  updateDoctor: (id, data) => http('PUT', '/doctors/'+id, data),
+  deleteDoctor: (id) => http('DELETE', '/doctors/'+id),
 
   // APPOINTMENTS
   getAppointments:      ()     => http('GET',   '/appointments'),
+  getAppointment:       (id)   => http('GET',   '/appointments/'+id),
   getTodayAppointments: ()     => http('GET',   '/appointments/today'),
   createAppointment:    (data) => http('POST',  '/appointments', data),
+  updateAppointment:    (id, data) => http('PUT', '/appointments/'+id, data),
   updateApptStatus:     (id, status) => http('PATCH', '/appointments/'+id+'/status', { status }),
+  deleteAppointment:    (id) => http('DELETE', '/appointments/'+id),
 
   // QUEUE
-  checkin:          (appointment_id, source) => http('POST',  '/queue/checkin', { appointment_id, source }),
+  checkin:          ({ appointment_id, patient_id, source = 'QR_Scan' }) => http('POST',  '/queue/checkin', { appointment_id, patient_id, source }),
   getQueue:         ()         => http('GET',   '/queue'),
   getOccupancy:     ()         => http('GET',   '/queue/occupancy'),
   beginConsult:     (queue_id) => http('PATCH', '/queue/'+queue_id+'/begin'),
@@ -143,8 +159,17 @@ const api = {
 
 // ── AUTH helpers ──────────────────────────────
 function getUser()  { try { return JSON.parse(sessionStorage.getItem('sc_user')); } catch { return null; } }
-function setUser(u) { sessionStorage.setItem('sc_user', JSON.stringify(u)); }
-function logout()   { sessionStorage.removeItem('sc_user'); window.location.href = '../login.html'; }
+function setUser(u) {
+  if (!u) return;
+  if (u.token) sessionStorage.setItem('sc_token', u.token);
+  const userData = u.data || u;
+  sessionStorage.setItem('sc_user', JSON.stringify(userData));
+}
+function logout() {
+  sessionStorage.removeItem('sc_user');
+  sessionStorage.removeItem('sc_token');
+  window.location.href = '../login.html';
+}
 
 function requireAuth(role) {
   const u = getUser();
@@ -175,7 +200,7 @@ function showAlert(id, type, msg, ms = 4000) {
   if (ms) setTimeout(() => el.classList.add('hidden'), ms);
 }
 
-// ── Sensor 2 live tick (polls backend every 10s) ──
+// ── Sensor 2 live tick (polls backend every 60s) ──
 setInterval(async () => {
   try {
     const res = await api.getOccupancy();
@@ -183,4 +208,4 @@ setInterval(async () => {
       detail: { count: res.occupancy, last_reading: res.last_reading }
     }));
   } catch (e) { /* backend offline — silent */ }
-}, 10000);
+}, 60000);

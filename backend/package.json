@@ -2,6 +2,7 @@
   "name": "smartclinic-backend",
   "version": "1.0.0",
   "description": "SmartClinic Queue & Appointment System — Group 2 MUT DSOF300/DVSF300",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

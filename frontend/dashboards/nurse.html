@@ -34,7 +34,7 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#00C896"/><rect x="13" y="5" width="6" height="22" rx="3" fill="white"/><rect x="5" y="13" width="22" height="6" rx="3" fill="white"/></svg>
+      <img src="https://i.postimg.cc/J7PDSJ7Z/Whats-App-Image-2026-05-15-at-14-28-51.jpg" alt="SmartClinic" style="height:26px;width:auto;border-radius:6px;object-fit:contain">
       <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#fff">Smart<span style="color:var(--green)">Clinic</span></span>
     </div>
     <div class="role-pill">Nurse</div>
@@ -80,7 +80,7 @@
             <div id="call-alert" class="alert hidden" style="margin-bottom:10px"></div>
             <button class="btn btn-primary btn-lg btn-block" onclick="callNext()" style="margin-bottom:10px">📢 Call Next Patient</button>
             <div style="display:flex;gap:10px">
-              <input id="call-manual-pid" style="flex:1;padding:10px 13px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:.875rem;outline:none" placeholder="Or enter Patient ID">
+              <input id="call-manual-pid" style="flex:1;padding:10px 13px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:.875rem;outline:none" placeholder="Or enter Queue # or Patient ID">
               <button class="btn btn-outline btn-sm" onclick="callSpecific()">Call</button>
             </div>
             <p style="font-size:.72rem;color:var(--text-dim);margin-top:8px">Uses browser speech synthesis to announce the patient 📣</p>
@@ -89,7 +89,7 @@
 
         <div class="card fade-in">
           <div class="section-header"><h3>Waiting List</h3><span class="badge badge-green" id="wl-count">0</span></div>
-          <div id="waiting-list"><div style="text-align:center;color:var(--text-dim);padding:28px;font-size:.875rem">No patients waiting.</div></div>
+          <div id="waiting-list"><div style="text-align:center;color:var(--text-dim);padding:28px;font-size:.875rem">Loading…</div></div>
         </div>
       </div>
     </div>
@@ -98,7 +98,7 @@
     <div id="sec-queue" class="hidden">
       <div class="card">
         <div class="section-header"><h3>Full Queue — All Statuses</h3><button class="btn btn-outline btn-sm" onclick="refreshNurse()">↻ Refresh</button></div>
-        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>ID</th><th>Checked In</th><th>Est. Wait</th><th>Status</th></tr></thead><tbody id="fq-tbody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Patient</th><th>Checked In</th><th>Est. Wait</th><th>Status</th></tr></thead><tbody id="fq-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -109,7 +109,7 @@
         <p style="font-size:.82rem;color:var(--text-dim)">This is what the wall screen shows. Active consultation highlighted in green.</p>
       </div>
       <div class="wall-grid" id="wall-grid">
-        <div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.25);padding:28px;font-size:.875rem">No patients in queue.</div>
+        <div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.25);padding:28px;font-size:.875rem">Loading…</div>
       </div>
     </div>
 
@@ -118,7 +118,7 @@
       <div class="card" style="max-width:480px">
         <div class="card-title">Doctor Contact Numbers</div>
         <p style="font-size:.82rem;color:var(--text-dim);margin-bottom:16px">Call these numbers when escalation is needed.</p>
-        <div id="nurse-contacts"></div>
+        <div id="nurse-contacts"><div style="text-align:center;color:var(--text-dim);padding:20px">Loading…</div></div>
       </div>
     </div>
 
@@ -128,115 +128,214 @@
 
 <script src="../js/api.js"></script>
 <script>
-const user=requireAuth('nurse');
-if(user){const displayName=user.full_name||user.name||'Nurse';$('sb-name').textContent=displayName;$('sb-av').textContent=displayName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();}
-function tick(){$('clock').textContent=new Date().toLocaleTimeString('en-ZA');}tick();setInterval(tick,1000);
+// ── Auth ────────────────────────────────────────────────────────────────────
+const nurseUser = requireAuth('nurse');
+if (nurseUser) {
+  const initials = nurseUser.full_name ? nurseUser.full_name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : 'NZ';
+  $('sb-av').textContent = initials;
+  $('sb-name').textContent = nurseUser.full_name || 'Nurse';
+}
 
-let currentCalled=null;
+// ── Navigation ───────────────────────────────────────────────────────────────
+var SECS   = {call:'sec-call', queue:'sec-queue', display:'sec-display', contacts:'sec-contacts'};
+var TITLES = {call:'Call Patient', queue:'Full Queue', display:'Wall Display', contacts:'Doctor Contacts'};
 
-var SECS={call:'sec-call',queue:'sec-queue',display:'sec-display',contacts:'sec-contacts'};
-var TITLES={call:'Call Patient',queue:'Full Queue',display:'Wall Display',contacts:'Doctor Contacts'};
-function go(name,evt){
+function go(name, evt) {
   evt = evt || window.event;
-  if(evt && evt.preventDefault) evt.preventDefault();
-  Object.keys(SECS).forEach(k=>$(SECS[k]).classList.add('hidden'));
+  if (evt && evt.preventDefault) evt.preventDefault();
+  Object.keys(SECS).forEach(k => $(SECS[k]).classList.add('hidden'));
   $(SECS[name]).classList.remove('hidden');
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  if(evt && evt.target) evt.target.closest('.nav-item').classList.add('active');
-  $('pg-title').textContent=TITLES[name];
-  if(name==='display')renderWall();
-  if(name==='contacts')renderContacts();
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (evt && evt.target) { const nav = evt.target.closest('.nav-item'); if (nav) nav.classList.add('active'); }
+  $('pg-title').textContent = TITLES[name];
+  if (name === 'display')  renderWall();
+  if (name === 'contacts') renderContacts();
   refreshNurse();
   return false;
 }
 
-function refreshNurse(){
-  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
-  $('q-badge').textContent=waiting.length+' waiting';
-  $('wl-count').textContent=waiting.length;
+// ── Clock ────────────────────────────────────────────────────────────────────
+(function tickClock() {
+  $('clock').textContent = new Date().toLocaleTimeString('en-ZA', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  setTimeout(tickClock, 1000);
+})();
 
-  // Waiting list
-  const wl=$('waiting-list');
-  if(!waiting.length){wl.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:28px;font-size:.875rem">No patients waiting.</div>';}
-  else{wl.innerHTML=waiting.map((q,i)=>{
-    const wait=calcWait(i);
-    const isCalled=currentCalled&&currentCalled.patient_id===q.patient_id;
-    return`<div class="pat-row${isCalled?' calling-glow':''}">
-      <div class="pat-num">#${q.queue_position}</div>
-      <div class="pat-info">
-        <div class="pn">${q.patient_name}${isCalled?'&nbsp;<span class="badge badge-green">Called</span>':''}</div>
-        <div class="pm">Checked in ${fmtTime(q.checkin_time)}</div>
-      </div>
-      <div class="pat-wait"><div class="wm">${wait}</div><div class="wl">min</div></div>
-      <button class="btn btn-outline btn-sm" onclick="callPatient('${q.patient_id}','${q.patient_name}','${q.queue_position}')">📢 Call</button>
-    </div>`;
-  }).join('');}
+// ── State ────────────────────────────────────────────────────────────────────
+let currentCalled = null;  // {queue_id, patient_name, queue_position}
+let avgWait = 15;          // rolling average minutes per patient, updated from API
 
-  // Full queue
-  const all=SC.queueEntries.sort((a,b)=>a.queue_position-b.queue_position);
-  const tbody=$('fq-tbody');
-  if(!all.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:20px">No entries.</td></tr>';}
-  else{const statusClass={CheckedIn:'badge-green',Consulting:'badge-amber',Completed:'badge-blue',Departed:'badge-dim'};
-    tbody.innerHTML=all.map((q,i)=>`<tr>
-      <td style="font-family:var(--mono);font-weight:700;color:var(--green)">#${q.queue_position}</td>
-      <td><b>${q.patient_name}</b></td>
-      <td><code>${q.patient_id}</code></td>
-      <td style="font-size:.78rem;color:var(--text-dim)">${fmtTime(q.checkin_time)}</td>
-      <td>${q.status==='CheckedIn'?calcWait(i)+' min':'—'}</td>
-      <td><span class="badge ${statusClass[q.status]||'badge-dim'}">${q.status}</span></td>
-    </tr>`).join('');}
+function fmtTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-ZA', {hour:'2-digit', minute:'2-digit'});
 }
 
-function callNext(){
-  const waiting=SC.queueEntries.filter(q=>q.status==='CheckedIn').sort((a,b)=>a.queue_position-b.queue_position);
-  if(!waiting.length){showAlert('call-alert','warning','No patients waiting.');return;}
-  callPatient(waiting[0].patient_id,waiting[0].patient_name,waiting[0].queue_position);
+function calcWait(positionIndex) {
+  return Math.max(1, Math.round(avgWait * (positionIndex + 1)));
 }
-function callSpecific(){
-  const pid=$('call-manual-pid').value.trim();
-  const e=SC.queueEntries.find(q=>q.patient_id===pid&&q.status==='CheckedIn');
-  if(!e){showAlert('call-alert','error','Patient not found or not checked in.');return;}
-  callPatient(e.patient_id,e.patient_name,e.queue_position);
-  $('call-manual-pid').value='';
+
+// ── Main refresh — calls real API ────────────────────────────────────────────
+async function refreshNurse() {
+  try {
+    // Fetch queue and rolling avg in parallel
+    const [qRes, avgRes] = await Promise.all([
+      api.getQueue(),
+      api.getRollingAvg().catch(() => null)
+    ]);
+
+    if (!qRes || !qRes.success) return;
+    const entries = qRes.data || [];
+
+    // Update rolling avg if available
+    if (avgRes && avgRes.success && avgRes.data && avgRes.data.avg_minutes) {
+      avgWait = parseFloat(avgRes.data.avg_minutes) || 15;
+    }
+
+    const waiting   = entries.filter(q => q.status === 'CheckedIn').sort((a,b) => a.queue_position - b.queue_position);
+    const all       = entries.sort((a,b) => a.queue_position - b.queue_position);
+
+    // Badge
+    $('q-badge').textContent  = waiting.length + ' waiting';
+    $('wl-count').textContent = waiting.length;
+
+    // ── Waiting list ────────────────────────────────────────────────────────
+    const wl = $('waiting-list');
+    if (!waiting.length) {
+      wl.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:28px;font-size:.875rem">No patients waiting.</div>';
+    } else {
+      wl.innerHTML = waiting.map((q, i) => {
+        const wait     = calcWait(i);
+        const isCalled = currentCalled && currentCalled.queue_id === q.queue_id;
+        const name     = q.patient_name || q.patient_id || 'Patient';
+        return `<div class="pat-row${isCalled ? ' calling-glow' : ''}">
+          <div class="pat-num">#${q.queue_position}</div>
+          <div class="pat-info">
+            <div class="pn">${name}${isCalled ? '&nbsp;<span class="badge badge-green">Called</span>' : ''}</div>
+            <div class="pm">Checked in ${fmtTime(q.checkin_time)}</div>
+          </div>
+          <div class="pat-wait"><div class="wm">${wait}</div><div class="wl">min est.</div></div>
+          <button class="btn btn-outline btn-sm" onclick="callPatient('${q.queue_id}','${name}','${q.queue_position}')">📢 Call</button>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Full queue table ────────────────────────────────────────────────────
+    const tbody = $('fq-tbody');
+    if (!all.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No entries.</td></tr>';
+    } else {
+      const statusClass = {CheckedIn:'badge-green', Consulting:'badge-amber', Completed:'badge-blue', Departed:'badge-dim'};
+      tbody.innerHTML = all.map((q, i) => `<tr>
+        <td style="font-family:var(--mono);font-weight:700;color:var(--green)">#${q.queue_position}</td>
+        <td><b>${q.patient_name || '—'}</b></td>
+        <td style="font-size:.78rem;color:var(--text-dim)">${fmtTime(q.checkin_time)}</td>
+        <td>${q.status === 'CheckedIn' ? calcWait(i) + ' min' : '—'}</td>
+        <td><span class="badge ${statusClass[q.status] || 'badge-dim'}">${q.status}</span></td>
+      </tr>`).join('');
+    }
+
+    // If wall display is visible, update it too
+    if (!$('sec-display').classList.contains('hidden')) renderWall(entries);
+
+  } catch (err) {
+    console.error('[Nurse] refreshNurse failed:', err);
+  }
 }
-function callPatient(pid,name,num){
-  currentCalled={patient_id:pid,patient_name:name,queue_position:num};
-  $('call-num').textContent='#'+num;
-  $('call-name').textContent=name;
-  $('call-room').textContent='Please proceed to Consulting Room 1';
-  showAlert('call-alert','success','📢 Called: '+name+' (#'+num+')');
+
+// ── Call patient ─────────────────────────────────────────────────────────────
+function callNext() {
+  // Read from the rendered waiting list rows to avoid a second API call
+  const firstBtn = $('waiting-list').querySelector('.btn');
+  if (!firstBtn) { showAlert('call-alert', 'warning', 'No patients waiting.'); return; }
+  firstBtn.click();
+}
+
+function callSpecific() {
+  const val = $('call-manual-pid').value.trim();
+  if (!val) return;
+  // Try to find by queue position number first, then by queue_id
+  const rows = $('waiting-list').querySelectorAll('.pat-row');
+  let found = false;
+  rows.forEach(row => {
+    const numEl = row.querySelector('.pat-num');
+    if (numEl && numEl.textContent.replace('#','').trim() === val) {
+      const btn = row.querySelector('.btn');
+      if (btn) { btn.click(); found = true; }
+    }
+  });
+  if (!found) { showAlert('call-alert', 'error', 'Patient not found or not checked in.'); return; }
+  $('call-manual-pid').value = '';
+}
+
+function callPatient(queueId, name, num) {
+  currentCalled = {queue_id: queueId, patient_name: name, queue_position: num};
+  $('call-num').textContent  = '#' + num;
+  $('call-name').textContent = name;
+  $('call-room').textContent = 'Please proceed to Consulting Room 1';
+  showAlert('call-alert', 'success', '📢 Called: ' + name + ' (#' + num + ')');
   refreshNurse();
-  if('speechSynthesis'in window){
+  if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utt=new SpeechSynthesisUtterance('Number '+num+', '+name+', please proceed to the consulting room.');
-    utt.lang='en-ZA';utt.rate=.88;utt.pitch=1;
+    const utt = new SpeechSynthesisUtterance('Number ' + num + ', ' + name + ', please proceed to the consulting room.');
+    utt.lang = 'en-ZA'; utt.rate = .88; utt.pitch = 1;
     window.speechSynthesis.speak(utt);
   }
 }
 
-function renderWall(){
-  const entries=SC.queueEntries.filter(q=>q.status==='CheckedIn'||q.status==='Consulting').sort((a,b)=>a.queue_position-b.queue_position).slice(0,8);
-  const wall=$('wall-grid');
-  if(!entries.length){wall.innerHTML='<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.25);padding:32px;font-size:.875rem">No patients in queue.</div>';return;}
-  wall.innerHTML=entries.map(q=>`
-    <div class="wall-slot${q.status==='Consulting'?' active':''}">
-      <div class="wsn">#${q.queue_position}</div>
-      <div class="wsname">${q.patient_name}</div>
-      <div class="wsstat">${q.status==='Consulting'?'🟢 In Consultation':'⏳ Waiting'}</div>
-    </div>`).join('');
+// ── Wall display ─────────────────────────────────────────────────────────────
+async function renderWall(cachedEntries) {
+  const wall = $('wall-grid');
+  try {
+    let entries = cachedEntries;
+    if (!entries) {
+      const res = await api.getQueue();
+      entries = (res && res.success) ? (res.data || []) : [];
+    }
+    const visible = entries
+      .filter(q => q.status === 'CheckedIn' || q.status === 'Consulting')
+      .sort((a,b) => a.queue_position - b.queue_position)
+      .slice(0, 8);
+
+    if (!visible.length) {
+      wall.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.25);padding:32px;font-size:.875rem">No patients in queue.</div>';
+      return;
+    }
+    wall.innerHTML = visible.map(q => `
+      <div class="wall-slot${q.status === 'Consulting' ? ' active' : ''}">
+        <div class="wsn">#${q.queue_position}</div>
+        <div class="wsname">${q.patient_name || '—'}</div>
+        <div class="wsstat">${q.status === 'Consulting' ? '🟢 In Consultation' : '⏳ Waiting'}</div>
+      </div>`).join('');
+  } catch (err) {
+    wall.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.25);padding:32px">Failed to load queue.</div>';
+  }
 }
 
-function renderContacts(){
-  $('nurse-contacts').innerHTML=DOCTORS.map(d=>`
-    <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.85rem">
-      <div style="font-size:1.3rem">👨‍⚕️</div>
-      <div style="flex:1"><div style="font-weight:700">${d.name}</div><div style="font-size:.75rem;color:var(--text-dim)">${d.specialty}</div></div>
-      <div style="font-family:var(--mono);color:var(--green);font-size:.8rem">📞 ${d.contact}</div>
-    </div>`).join('');
+// ── Doctor contacts ───────────────────────────────────────────────────────────
+async function renderContacts() {
+  const el = $('nurse-contacts');
+  try {
+    const res = await api.getDoctors();
+    if (!res || !res.success || !res.data.length) {
+      el.innerHTML = '<div style="color:var(--text-dim);font-size:.85rem">No doctors found.</div>';
+      return;
+    }
+    el.innerHTML = res.data.map(d => `
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.85rem">
+        <div style="font-size:1.3rem">👨‍⚕️</div>
+        <div style="flex:1">
+          <div style="font-weight:700">${d.name || d.full_name || '—'}</div>
+          <div style="font-size:.75rem;color:var(--text-dim)">${d.specialty || d.specialization || 'General'}</div>
+        </div>
+        <div style="font-family:var(--mono);color:var(--green);font-size:.8rem">📞 ${d.contact || d.phone || 'N/A'}</div>
+      </div>`).join('');
+  } catch (err) {
+    el.innerHTML = '<div style="color:var(--text-dim);font-size:.85rem">Failed to load contacts.</div>';
+  }
 }
 
-refreshNurse();setInterval(refreshNurse,5000);
-document.addEventListener('sensor2tick',refreshNurse);
+// ── Init ─────────────────────────────────────────────────────────────────────
+refreshNurse();
+setInterval(refreshNurse, 5000);
 </script>
 </body>
 </html>

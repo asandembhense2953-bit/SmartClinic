@@ -12,6 +12,7 @@ router.get('/',               ctrl.getAppointments);
 router.post('/',              ctrl.createAppointment);
 router.get('/today',          ctrl.getTodayAppointments);
 router.get('/:id',            ctrl.getAppointment);
+router.put('/:id',            ctrl.updateAppointment);
 router.patch('/:id/status',   ctrl.updateAppointmentStatus);
 router.delete('/:id',         ctrl.deleteAppointment);
 

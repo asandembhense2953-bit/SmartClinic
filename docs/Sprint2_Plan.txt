@@ -1,0 +1,173 @@
+SMARTCLINIC — SPRINT 2 PLAN
+============================
+Course:  DSOF300/DVSF300 — Development Software 3
+Group:   Group 2
+Sprint:  Sprint 2 — API Expansion, IoT & Integration
+Dates:   Week 3
+Goal:    Expand the API, integrate IoT sensor simulation,
+         and deliver a basic frontend consuming the API.
+
+
+════════════════════════════════════════════════════════════
+SPRINT GOAL
+════════════════════════════════════════════════════════════
+By the end of Sprint 2, the team will have:
+- Full CRUD across all remaining entities (Queue, Sensors,
+  Predictions)
+- Two simulated IoT sensors writing live data to the DB
+- At least one As-Is business process bottleneck automated
+- A role-based frontend (5 dashboards) consuming the API
+- A Postman collection documenting all endpoints
+
+
+════════════════════════════════════════════════════════════
+AS-IS PROCESS ANALYSIS
+════════════════════════════════════════════════════════════
+Bottleneck identified from the As-Is process model:
+
+  BOTTLENECK: Manual paper-based patient check-in
+  ─────────────────────────────────────────────────
+  Current (As-Is):
+    Patient arrives → receptionist searches paper register →
+    writes name on whiteboard → calls number manually →
+    no visibility of waiting time for patient or staff.
+
+  Problems:
+    - Receptionist spends 3–5 min per patient on admin
+    - No real-time queue visibility for doctors/nurses
+    - No wait-time estimates — patients have no information
+    - Occupancy not tracked — clinic can become overcrowded
+      without staff being aware
+
+  TO-BE (Automated in Sprint 2):
+    Patient scans QR card at kiosk → system auto-assigns
+    queue number → calculates wait estimate → all dashboards
+    update in real time → occupancy monitored by Sensor 2
+    every 10 seconds → warning fires at capacity threshold.
+
+
+════════════════════════════════════════════════════════════
+USER STORIES
+════════════════════════════════════════════════════════════
+
+US-05  As a patient, I want to scan my QR card to check in
+       so that I receive a queue number without waiting at
+       the reception desk.
+
+US-06  As a patient, I want to see my estimated wait time
+       so that I can plan accordingly.
+
+US-07  As a doctor, I want to begin and end consultations
+       from my dashboard so that timing is recorded
+       automatically.
+
+US-08  As a nurse, I want to call the next patient by name
+       with a voice announcement so that patients hear
+       their call clearly.
+
+US-09  As a receptionist, I want to monitor live occupancy
+       so that I can manage capacity and avoid overcrowding.
+
+US-10  As an admin, I want to view sensor data and
+       prediction accuracy so that I can assess system
+       performance.
+
+
+════════════════════════════════════════════════════════════
+TASK BREAKDOWN
+════════════════════════════════════════════════════════════
+
+TASK  DESCRIPTION                               ESTIMATE  ASSIGNEE
+--------------------------------------------------------------------
+T-15  Build Queue model + controller            2 hrs     Backend
+T-16  Build Sensor model + controller           1.5 hrs   Backend
+T-17  Build Prediction model + controller       1.5 hrs   Backend
+T-18  Add queue/sensor/prediction routes        1 hr      Backend
+T-19  Implement Sensor 1 (SmartCheckIn) —       1.5 hrs   Backend
+      fires on every check-in event
+T-20  Implement Sensor 2 (ActiveQueueOcc.) —    1.5 hrs   Backend
+      setInterval polling every 10 seconds
+T-21  Implement rolling average + wait-time     2 hrs     Backend
+      prediction logic
+T-22  Build shared frontend api.js layer        1 hr      Frontend
+T-23  Build Login page                          1 hr      Frontend
+T-24  Build Patient Registration page + QR PDF  2 hrs     Frontend
+T-25  Build Admin dashboard                     2 hrs     Frontend
+T-26  Build Receptionist dashboard + kiosk      2.5 hrs   Frontend
+T-27  Build Doctor dashboard                    2 hrs     Frontend
+T-28  Build Nurse dashboard + voice call        1.5 hrs   Frontend
+T-29  Build Patient dashboard                   1.5 hrs   Frontend
+T-30  Build SmartCheckIn kiosk page             2 hrs     Frontend
+T-31  Export Postman collection                 1 hr      All
+T-32  Write Sprint 2 Review                     0.5 hr    All
+
+
+════════════════════════════════════════════════════════════
+IOT SENSOR DESIGN
+════════════════════════════════════════════════════════════
+
+Sensor 1 — SmartCheckIn
+  Trigger:   Patient check-in event (QR scan or manual)
+  Data:      sensor_type='SmartCheckIn', source, patient_id,
+             occupancy_level (current active count)
+  Storage:   sensor_readings table
+  Purpose:   Logs every check-in event for audit and
+             analytics (IS3 requirement)
+
+Sensor 2 — ActiveQueueOccupancy
+  Trigger:   setInterval every 10 000 ms (Node.js backend)
+  Data:      sensor_type='ActiveQueueOccupancy',
+             source='setInterval_Auto',
+             occupancy_level (live count of CheckedIn patients)
+  Storage:   sensor_readings table
+  Purpose:   Continuous occupancy monitoring — fires warning
+             at 8+ patients, powers the live occupancy bar
+             on the receptionist dashboard
+
+
+════════════════════════════════════════════════════════════
+ADDITIONAL ENDPOINTS PLANNED (Sprint 2)
+════════════════════════════════════════════════════════════
+
+Queue
+  POST   /api/queue/checkin
+  GET    /api/queue
+  GET    /api/queue/occupancy
+  PATCH  /api/queue/:id/begin
+  PATCH  /api/queue/:id/end
+  PATCH  /api/queue/:id/depart
+
+Sensors
+  GET    /api/sensors
+  GET    /api/sensors/today
+  GET    /api/sensors/type/:type
+
+Predictions
+  GET    /api/predictions
+  GET    /api/predictions/average
+
+
+════════════════════════════════════════════════════════════
+FRONTEND PAGES PLANNED
+════════════════════════════════════════════════════════════
+  login.html            — role-based login with demo buttons
+  register.html         — patient registration + QR card PDF
+  dashboards/
+    admin.html          — KPIs, sensor analytics, Power BI
+    receptionist.html   — live queue, kiosk, appointments
+    doctor.html         — consultation management, queue
+    nurse.html          — patient calling, wall display
+    patient.html        — personal queue status, QR card
+    smartcheckin.html   — standalone kiosk (QR + manual)
+
+
+════════════════════════════════════════════════════════════
+DEFINITION OF DONE
+════════════════════════════════════════════════════════════
+- All queue/sensor/prediction endpoints tested and working
+- Sensor 2 fires automatically every 10 seconds on startup
+- Frontend dashboards load and consume live backend data
+- QR check-in flow works end-to-end (scan → queue → wait)
+- Postman collection exported and included in repo
+- All code pushed to GitHub with meaningful commits
+- Sprint Review document completed

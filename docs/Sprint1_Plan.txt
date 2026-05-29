@@ -1,0 +1,119 @@
+SMARTCLINIC — SPRINT 1 PLAN
+============================
+Course:  DSOF300/DVSF300 — Development Software 3
+Group:   Group 2
+Sprint:  Sprint 1 — Backend & Database Foundation
+Dates:   Week 2
+Goal:    Deliver a working backend with a structured database
+         and initial CRUD operations.
+
+
+════════════════════════════════════════════════════════════
+SPRINT GOAL
+════════════════════════════════════════════════════════════
+By the end of Sprint 1, the team will have:
+- A 3NF relational database running on Supabase PostgreSQL
+- A Node.js/Express backend with MVC architecture
+- At least 3 RESTful resource endpoints with full CRUD
+- The project committed to version control with meaningful
+  commit messages
+
+
+════════════════════════════════════════════════════════════
+USER STORIES
+════════════════════════════════════════════════════════════
+
+US-01  As a receptionist, I need to register patients so
+       that they exist in the system before their visit.
+
+US-02  As an admin, I need to manage doctor records so
+       that appointments can be assigned correctly.
+
+US-03  As a receptionist, I need to book appointments so
+       that patients are linked to a doctor and date/time.
+
+US-04  As a developer, I need a login endpoint so that
+       users can authenticate and receive their role.
+
+
+════════════════════════════════════════════════════════════
+TASK BREAKDOWN
+════════════════════════════════════════════════════════════
+
+TASK  DESCRIPTION                               ESTIMATE  ASSIGNEE
+--------------------------------------------------------------------
+T-01  Design ERD and normalise to 3NF           2 hrs     All
+T-02  Create database schema (schema.sql)       1 hr      Backend
+T-03  Set up Supabase project and run schema    1 hr      Backend
+T-04  Initialise Node.js project (Express)      1 hr      Backend
+T-05  Configure .env and Supabase client        0.5 hr    Backend
+T-06  Build Users model + auth controller       2 hrs     Backend
+T-07  Build Patients model + CRUD controller    2 hrs     Backend
+T-08  Build Doctors model + CRUD controller     1.5 hrs   Backend
+T-09  Build Appointments model + controller     2 hrs     Backend
+T-10  Set up route files (modular MVC)          1 hr      Backend
+T-11  Add global error handler middleware       0.5 hr    Backend
+T-12  Test all endpoints manually (Postman)     1.5 hrs   All
+T-13  Set up GitHub repo + commit structure     0.5 hr    All
+T-14  Write Sprint 1 Review                     0.5 hr    All
+
+
+════════════════════════════════════════════════════════════
+DATABASE DESIGN — ENTITIES (3NF)
+════════════════════════════════════════════════════════════
+
+Entity          Primary Key        Key Relationships
+------------------------------------------------------------
+users           user_id (UUID)     —
+patients        patient_id (TEXT)  —
+doctors         doctor_id (UUID)   —
+appointments    appointment_id     FK → patients, doctors
+
+3NF Compliance:
+- All attributes are atomic (1NF).
+- No partial dependencies on composite keys (2NF).
+- No transitive dependencies — every non-key attribute
+  depends only on the primary key, not on another
+  non-key attribute (3NF).
+- Referential integrity enforced via FOREIGN KEY
+  constraints with ON DELETE CASCADE.
+
+
+════════════════════════════════════════════════════════════
+ENDPOINTS PLANNED (Sprint 1)
+════════════════════════════════════════════════════════════
+
+Auth
+  POST   /api/auth/login
+
+Patients (full CRUD)
+  GET    /api/patients
+  POST   /api/patients
+  GET    /api/patients/:id
+  PUT    /api/patients/:id
+  DELETE /api/patients/:id
+
+Doctors (full CRUD)
+  GET    /api/doctors
+  POST   /api/doctors
+  GET    /api/doctors/:id
+  PUT    /api/doctors/:id
+  DELETE /api/doctors/:id
+
+Appointments (full CRUD)
+  GET    /api/appointments
+  POST   /api/appointments
+  GET    /api/appointments/today
+  GET    /api/appointments/:id
+  PATCH  /api/appointments/:id/status
+  DELETE /api/appointments/:id
+
+
+════════════════════════════════════════════════════════════
+DEFINITION OF DONE
+════════════════════════════════════════════════════════════
+- All planned endpoints return correct JSON responses
+- Database schema is live on Supabase with FK constraints
+- Code follows MVC structure (routes → controllers → models)
+- All code pushed to GitHub with meaningful commit messages
+- Sprint Review document completed

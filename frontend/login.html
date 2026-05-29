@@ -92,7 +92,7 @@
         <p class="desc">Empowering patients &amp; staff with real-time occupancy, QR check-in, and predictive wait times.</p>
         <div class="feats">
           <div class="feat"><div class="feat-ico">📲</div> QR card check-in — zero contact</div>
-          <div class="feat"><div class="feat-ico">📡</div> Live sensors — updates every 10s</div>
+          <div class="feat"><div class="feat-ico">📡</div> Live sensors — updates every 1 minute</div>
           <div class="feat"><div class="feat-ico">⏱️</div> Dynamic wait-time predictions</div>
           <div class="feat"><div class="feat-ico">📈</div> Power BI admin analytics</div>
         </div>
@@ -133,8 +133,8 @@
       <div id="toast"></div>
 
       <div class="field">
-        <label>Email Address</label>
-        <input id="email" type="email" placeholder="you@smartclinic.co.za" autocomplete="email">
+        <label>Email or SA ID Number</label>
+        <input id="email" type="text" placeholder="staff@smartclinic.co.za or 9001015800088" autocomplete="email">
       </div>
       <div class="field">
         <label>Password</label>
@@ -156,8 +156,17 @@
     window.location.href = ROLE_PAGES[existing.role];
   }
 
-  function fill(email) {
-    $('email').value    = email;
+  function fill(id) {
+    if (id.includes('@')) {
+      // Staff email
+      $('email').value    = id;
+    } else if (id.includes('Patient')) {
+      // Patient demo — extract ID
+      const match = id.match(/\(([^)]+)\)/);
+      $('email').value = match ? match[1] : id;
+    } else {
+      $('email').value = id;
+    }
     $('password').value = 'clinic123';
     toast('success', '✅ Demo credentials loaded — click Sign In.');
   }
@@ -173,8 +182,8 @@
 
     try {
       const res = await api.login(email, pw);
-      // Store session — backend returns user without password
-      setUser(res.data);
+      // Store session — backend returns user without password and token
+      setUser({ ...res.data, token: res.token });
       toast('success', `✨ Welcome, ${res.data.full_name}! Redirecting…`);
       setTimeout(() => { window.location.href = ROLE_PAGES[res.data.role]; }, 900);
     } catch (err) {

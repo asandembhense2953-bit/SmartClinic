@@ -1,10 +1,15 @@
-// routes/authRoutes.js
-const router = require('express').Router();
-const ctrl   = require('../controllers');
+const express = require('express');
+const ctrl = require('../controllers/index.js');
+const { authenticate } = require('../middleware/auth');
+
+const router = express.Router();
 
 // POST /api/auth/login
-// GET  /api/auth/users
-router.post('/login',  ctrl.login);
-router.get('/users',   ctrl.getUsers);
+// Protect user management endpoints
+router.post('/login', ctrl.login);
+router.post('/users', authenticate, ctrl.createUser);
+router.get('/users', authenticate, ctrl.getUsers);
+router.put('/users/:id', authenticate, ctrl.updateUser);
+router.delete('/users/:id', authenticate, ctrl.deleteUser);
 
 module.exports = router;

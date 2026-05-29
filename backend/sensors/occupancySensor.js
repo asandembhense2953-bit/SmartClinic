@@ -1,11 +1,11 @@
 // sensors/occupancySensor.js
 // ── SENSOR 2 — ActiveQueueOccupancy ──────────
-// setInterval every 10s, counts CheckedIn queue
+// setInterval every 60s, counts CheckedIn queue
 // entries, writes to sensor_readings table
 // ─────────────────────────────────────────────
 const { Queue, Sensors } = require('../models');
 
-const INTERVAL_MS = 10 * 1000; // 10 seconds
+const INTERVAL_MS = 60 * 1000; // 60 seconds (1 minute)
 const THRESHOLD   = 8;
 
 let interval = null;

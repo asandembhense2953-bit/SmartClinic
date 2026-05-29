@@ -1,0 +1,110 @@
+SMARTCLINIC — SPRINT 1 REVIEW
+==============================
+Course:  DSOF300/DVSF300 — Development Software 3
+Group:   Group 2
+Sprint:  Sprint 1 — Backend & Database Foundation
+Dates:   Week 2
+
+
+════════════════════════════════════════════════════════════
+SPRINT GOAL — ACHIEVED
+════════════════════════════════════════════════════════════
+The team successfully delivered a working backend with a
+structured 3NF database and full CRUD operations across
+three core entities (Patients, Doctors, Appointments).
+
+
+════════════════════════════════════════════════════════════
+WHAT WAS COMPLETED
+════════════════════════════════════════════════════════════
+
+DATABASE
+  ✅ 3NF relational schema designed (ERD produced)
+  ✅ 4 tables created: users, patients, doctors, appointments
+  ✅ Foreign key constraints with ON DELETE CASCADE
+  ✅ Schema deployed on Supabase PostgreSQL
+  ✅ Demo seed data inserted for testing
+
+BACKEND ARCHITECTURE
+  ✅ Node.js + Express project initialised
+  ✅ MVC architecture implemented:
+       routes/ → controllers/index.js → models/index.js → config/supabase.js
+  ✅ Environment variables via dotenv (.env.example provided)
+  ✅ Global error handler middleware
+  ✅ CORS configured for frontend consumption
+
+ENDPOINTS DELIVERED
+  ✅ POST   /api/auth/login          (authentication)
+  ✅ GET    /api/auth/users          (list all users)
+  ✅ GET    /api/patients            (CRUD — Read All)
+  ✅ POST   /api/patients            (CRUD — Create)
+  ✅ GET    /api/patients/:id        (CRUD — Read One)
+  ✅ PUT    /api/patients/:id        (CRUD — Update)
+  ✅ DELETE /api/patients/:id        (CRUD — Delete)
+  ✅ GET    /api/doctors             (CRUD — Read All)
+  ✅ POST   /api/doctors             (CRUD — Create)
+  ✅ GET    /api/doctors/:id         (CRUD — Read One)
+  ✅ PUT    /api/doctors/:id         (CRUD — Update)
+  ✅ DELETE /api/doctors/:id         (CRUD — Delete)
+  ✅ GET    /api/appointments        (CRUD — Read All)
+  ✅ POST   /api/appointments        (CRUD — Create)
+  ✅ GET    /api/appointments/today  (filtered read)
+  ✅ GET    /api/appointments/:id    (CRUD — Read One)
+  ✅ PATCH  /api/appointments/:id/status (CRUD — Update)
+  ✅ DELETE /api/appointments/:id    (CRUD — Delete)
+
+VERSION CONTROL
+  ✅ GitHub repository created
+  ✅ Commits made with descriptive messages throughout sprint
+
+
+════════════════════════════════════════════════════════════
+WHAT WAS NOT COMPLETED
+════════════════════════════════════════════════════════════
+  ⏳ Queue and sensor endpoints — moved to Sprint 2
+  ⏳ Frontend — moved to Sprint 2
+  ⏳ Postman collection export — moved to Sprint 2
+
+
+════════════════════════════════════════════════════════════
+CHALLENGES & HOW THEY WERE RESOLVED
+════════════════════════════════════════════════════════════
+
+Challenge 1: Supabase join syntax
+  The Supabase JS client uses a different syntax for joins
+  compared to raw SQL. Resolved by reading the Supabase docs
+  and using the select('*, relation(fields)') pattern.
+
+Challenge 2: Preventing double check-in
+  Identified early that the queue needed a uniqueness check
+  before Sprint 2. Added getByAppointment() to the Queue
+  model to detect existing active entries.
+
+Challenge 3: 3NF for consultation timing
+  Initially planned to store consult_start/end on the
+  appointments table, but this would create a partial
+  dependency. Moved timing fields to queue_entries to
+  maintain 3NF compliance.
+
+
+════════════════════════════════════════════════════════════
+LESSONS LEARNED
+════════════════════════════════════════════════════════════
+- Designing the ERD before writing any code saved significant
+  refactoring time. We recommend always starting with the
+  schema.
+- Supabase's real-time features were not needed for this
+  sprint but will be considered for Sprint 2 as an
+  alternative to polling.
+- The MVC split made it easy to add new entities — the
+  pattern was consistent across patients, doctors, and
+  appointments.
+
+
+════════════════════════════════════════════════════════════
+SPRINT METRICS
+════════════════════════════════════════════════════════════
+  Tasks planned:    14
+  Tasks completed:  14
+  Endpoints built:  18
+  Tables created:    4

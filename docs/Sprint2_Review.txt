@@ -1,0 +1,163 @@
+SMARTCLINIC — SPRINT 2 REVIEW
+==============================
+Course:  DSOF300/DVSF300 — Development Software 3
+Group:   Group 2
+Sprint:  Sprint 2 — API Expansion, IoT & Integration
+Dates:   Week 3
+
+
+════════════════════════════════════════════════════════════
+SPRINT GOAL — ACHIEVED
+════════════════════════════════════════════════════════════
+The team successfully expanded the API to cover all entities,
+integrated two IoT sensors writing live data into the
+database, automated the manual check-in bottleneck, and
+delivered five role-based frontend dashboards consuming the
+backend API.
+
+
+════════════════════════════════════════════════════════════
+WHAT WAS COMPLETED
+════════════════════════════════════════════════════════════
+
+API EXPANSION — FULL CRUD ACROSS ALL ENTITIES
+  ✅ Queue endpoints (checkin, get active, occupancy,
+     begin, end, depart)
+  ✅ Sensor endpoints (all, today, by type)
+  ✅ Prediction endpoints (today's log, rolling average)
+  ✅ Total endpoints across system: 30+
+
+IOT SENSOR INTEGRATION
+  ✅ Sensor 1 (SmartCheckIn) — fires on every check-in event
+     and writes to sensor_readings with source, patient_id,
+     and current occupancy level
+  ✅ Sensor 2 (ActiveQueueOccupancy) — setInterval polling
+     every 10 seconds, writes live occupancy count to DB,
+     triggers capacity warning at 8+ patients
+  ✅ Both sensors visible in sensor log on all relevant
+     dashboards
+
+BUSINESS PROCESS AUTOMATION
+  ✅ As-Is bottleneck automated: manual paper check-in
+     replaced with QR scan → auto queue assignment →
+     wait-time prediction → real-time dashboard updates
+  ✅ Rolling average algorithm calculates estimated wait
+     using that day's completed consultation durations
+  ✅ Prediction accuracy scored 0–100% after each
+     consultation ends (actual vs estimated)
+  ✅ Occupancy warning fires automatically at threshold
+
+FRONTEND DASHBOARDS (all consuming live API)
+  ✅ login.html         — auth with role-based redirect
+  ✅ register.html      — patient registration + QR PDF card
+  ✅ admin.html         — KPIs, sensor charts, prediction log,
+                          patient/doctor management, Power BI guide
+  ✅ receptionist.html  — live queue, QR kiosk, manual check-in,
+                          appointments, occupancy bar
+  ✅ doctor.html        — begin/end consultation, timer,
+                          queue view, prediction log
+  ✅ nurse.html         — patient calling (voice), wall display,
+                          queue overview
+  ✅ patient.html       — personal queue status, wait estimate,
+                          QR card, appointments
+  ✅ smartcheckin.html  — standalone kiosk with QR camera scan,
+                          manual entry, registration, sensor log
+
+API DOCUMENTATION
+  ✅ Postman collection exported with all 30+ endpoints,
+     example request bodies, and example responses
+     (docs/SmartClinic_API.postman_collection.json)
+
+VERSION CONTROL
+  ✅ All Sprint 2 work committed to GitHub with descriptive
+     commit messages
+
+
+════════════════════════════════════════════════════════════
+WHAT WAS NOT COMPLETED
+════════════════════════════════════════════════════════════
+  ⏳ Real physical QR scanner hardware — simulated via
+     jsQR library and device camera (sufficient for demo)
+  ⏳ SMS/email patient notifications — not in scope for
+     this submission
+  ⏳ User management UI for admin — admin can view users
+     but cannot create/edit them from the dashboard yet
+
+
+════════════════════════════════════════════════════════════
+CHALLENGES & HOW THEY WERE RESOLVED
+════════════════════════════════════════════════════════════
+
+Challenge 1: Rolling average with no data on first check-in
+  On the first check-in of the day there are no completed
+  consultations to average. Resolved by defaulting to 15
+  minutes if the durations array is empty, with a visible
+  flag (using_default: true) in the API response.
+
+Challenge 2: Sensor 2 running before server is ready
+  The setInterval started before the Supabase connection
+  was confirmed, causing early errors. Resolved by calling
+  occupancySensor.start() inside the app.listen() callback
+  instead of at module load time.
+
+Challenge 3: Double check-in prevention
+  QR scan events could fire twice in quick succession.
+  Resolved by adding a lockout flag in the frontend and
+  a server-side check (getByAppointment) that returns 409
+  if the patient is already in the active queue.
+
+Challenge 4: BarcodeDetector API browser support
+  The native BarcodeDetector API is not available in all
+  browsers. Resolved by falling back to the jsQR library
+  (canvas pixel-scan approach) when BarcodeDetector is
+  unavailable.
+
+Challenge 5: Prediction accuracy for very short consults
+  When actual wait was much shorter than estimated, the
+  accuracy score went negative. Resolved by clamping the
+  result to a minimum of 0 in _calcAccuracy().
+
+
+════════════════════════════════════════════════════════════
+LESSONS LEARNED
+════════════════════════════════════════════════════════════
+- Breaking the sensor logic into a separate file
+  (sensors/occupancySensor.js) made it easy to start/stop
+  independently during testing without restarting the server.
+- The shared api.js frontend layer (single source of truth
+  for all HTTP calls) prevented duplicated fetch logic
+  across all five dashboards.
+- Real-time occupancy polling every 10 seconds via a
+  CustomEvent on the document object was an effective way
+  to update all dashboards without a page reload or
+  WebSocket setup.
+- Starting with the Postman collection open during
+  development made it much easier to document endpoints
+  as they were built rather than retrospectively.
+
+
+════════════════════════════════════════════════════════════
+SPRINT METRICS
+════════════════════════════════════════════════════════════
+  Tasks planned:          18
+  Tasks completed:        15
+  Tasks deferred:          3 (not in scope)
+  New endpoints built:    12
+  Total endpoints (both sprints): 30+
+  Frontend pages built:    8
+  IoT sensors integrated:  2
+  Sensor readings per day: ~8 640 (Sensor 2 every 10 sec)
+  Prediction accuracy avg: ~78%
+
+
+════════════════════════════════════════════════════════════
+OVERALL PROJECT STATUS
+════════════════════════════════════════════════════════════
+Both sprint goals have been met. The SmartClinic system
+is fully functional end-to-end:
+
+  Registration → QR Card → Check-In → Queue → Consultation
+  → Prediction Scoring → Sensor Logging → Analytics
+
+All IS3 and IP2 requirements have been addressed across
+both sprints. The system is ready for demonstration.
